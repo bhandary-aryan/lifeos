@@ -1,0 +1,121 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="lifeos-light">
+<head>
+  {% include "base_head.html" %}
+  <title>{% block title %}{{ page_title|default:"Home" }}{% endblock %} · {{ SITE_NAME }}</title>
+</head>
+<body class="min-h-screen bg-base-200 font-sans text-base-content antialiased">
+<a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 btn btn-primary btn-sm">Skip to content</a>
+
+<div class="drawer lg:drawer-open">
+  <input id="nav-drawer" type="checkbox" class="drawer-toggle" aria-label="Toggle navigation">
+
+  <div class="drawer-content flex min-h-screen flex-col">
+    <!-- Top bar -->
+    <header class="sticky top-0 z-30 border-b border-base-300 bg-base-100/90 backdrop-blur">
+      <div class="flex items-center gap-3 px-4 py-3 lg:px-8">
+        <label for="nav-drawer" class="btn btn-ghost btn-square btn-sm lg:hidden" aria-label="Open navigation">
+          <i data-lucide="menu" class="h-5 w-5"></i>
+        </label>
+        <div class="min-w-0 flex-1">
+          <h1 class="truncate text-lg font-semibold leading-tight">{{ page_title|default:SITE_NAME }}</h1>
+          <p class="hidden text-xs text-base-content/60 sm:block">{% now "l, j F Y" %}</p>
+        </div>
+
+        <!-- Quick add: modules arrive in later phases, so entries are disabled for now -->
+        <div class="dropdown dropdown-end">
+          <button type="button" tabindex="0" class="btn btn-primary btn-sm gap-1" aria-haspopup="true">
+            <i data-lucide="plus" class="h-4 w-4"></i><span class="hidden sm:inline">Quick add</span>
+          </button>
+          <ul tabindex="0" class="menu dropdown-content z-40 mt-2 w-60 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg">
+            <li class="menu-title">Available soon</li>
+            <li class="disabled"><span><i data-lucide="check-square" class="h-4 w-4"></i> Task <span class="badge badge-ghost badge-sm">Phase 2</span></span></li>
+            <li class="disabled"><span><i data-lucide="target" class="h-4 w-4"></i> Goal <span class="badge badge-ghost badge-sm">Phase 2</span></span></li>
+            <li class="disabled"><span><i data-lucide="receipt" class="h-4 w-4"></i> Transaction <span class="badge badge-ghost badge-sm">Phase 3</span></span></li>
+          </ul>
+        </div>
+
+        <!-- Profile menu -->
+        <div class="dropdown dropdown-end">
+          <button type="button" tabindex="0" class="btn btn-ghost btn-circle avatar placeholder" aria-label="Account menu" aria-haspopup="true">
+            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-sm font-semibold text-primary">{{ request.user.get_short_name|slice:":1"|upper }}</span>
+          </button>
+          <ul tabindex="0" class="menu dropdown-content z-40 mt-2 w-64 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg">
+            <li class="menu-title normal-case"><span class="truncate">{{ request.user.email }}</span></li>
+            <li><a href="{% url 'accounts:settings' %}"><i data-lucide="settings" class="h-4 w-4"></i> Settings</a></li>
+            <li>
+              <button type="button" x-data="themeToggle()" @click="toggle()">
+                <i data-lucide="sun-moon" class="h-4 w-4"></i> <span x-text="label"></span>
+              </button>
+            </li>
+            <li>
+              <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
+                <button type="submit" class="w-full text-left"><i data-lucide="log-out" class="h-4 w-4"></i> Sign out</button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-24 lg:px-8 lg:pb-10">
+      {% include "components/messages.html" %}
+      <div class="{% if messages %}mt-4{% endif %}">{% block content %}{% endblock %}</div>
+    </main>
+
+    <!-- Mobile bottom navigation -->
+    <nav class="btm-nav btm-nav-sm fixed bottom-0 z-30 border-t border-base-300 bg-base-100 lg:hidden" aria-label="Quick navigation">
+      {% for item in nav_items %}{% if forloop.counter <= 4 or item.label == "Settings" %}
+      <a href="{{ item.url }}" class="{% if item.active %}active text-primary{% endif %}" {% if item.active %}aria-current="page"{% endif %}>
+        <i data-lucide="{{ item.icon }}" class="h-5 w-5" aria-hidden="true"></i>
+        <span class="btm-nav-label text-[11px]">{{ item.label|truncatechars:10 }}</span>
+      </a>
+      {% endif %}{% endfor %}
+    </nav>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="drawer-side z-40">
+    <label for="nav-drawer" aria-label="Close navigation" class="drawer-overlay"></label>
+    <aside class="flex min-h-full w-72 flex-col border-r border-base-300 bg-base-100 p-4">
+      <a href="{% url 'dashboard:home' %}" class="mb-6 flex items-center gap-2 px-2 text-lg font-bold tracking-tight">
+        <span class="flex h-9 w-9 items-center justify-center rounded-btn bg-primary text-primary-content"><i data-lucide="compass" class="h-5 w-5"></i></span>
+        {{ SITE_NAME }}
+      </a>
+      <nav aria-label="Main navigation">{% include "components/nav_links.html" %}</nav>
+    </aside>
+  </div>
+</div>
+
+<script src="{% static 'vendor/htmx.min.js' %}" defer></script>
+<script src="{% static 'vendor/lucide.min.js' %}"></script>
+<script>
+  function themeToggle() {
+    var order = ["light", "dark", "system"];
+    var names = { light: "Theme: Light", dark: "Theme: Dark", system: "Theme: Device" };
+    var current = "{{ theme_pref|default:'system' }}";
+    return {
+      current: current,
+      get label() { return names[this.current]; },
+      toggle() {
+        this.current = order[(order.indexOf(this.current) + 1) % order.length];
+        var resolved = this.current === "system"
+          ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : this.current;
+        document.documentElement.setAttribute("data-theme", "lifeos-" + resolved);
+        var body = new URLSearchParams({ theme: this.current });
+        fetch("{% url 'accounts:set_theme' %}", {
+          method: "POST",
+          headers: { "X-CSRFToken": "{{ csrf_token }}", "Content-Type": "application/x-www-form-urlencoded" },
+          body: body
+        });
+      }
+    };
+  }
+  document.addEventListener("DOMContentLoaded", function () { lucide.createIcons(); });
+  document.body.addEventListener("htmx:afterSwap", function () { lucide.createIcons(); });
+</script>
+<script src="{% static 'vendor/alpine.min.js' %}" defer></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

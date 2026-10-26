@@ -1,0 +1,31 @@
+{% extends "auth_base.html" %}
+{% block title %}Welcome{% endblock %}
+{% block content %}
+<p class="text-xs font-medium uppercase tracking-wide text-primary">Step {{ step }} of {{ total }} · optional</p>
+<progress class="progress progress-primary mt-2 w-full" value="{{ step }}" max="{{ total }}" aria-label="Onboarding progress"></progress>
+<h1 class="mt-4 text-2xl font-semibold">{{ title }}</h1>
+<p class="mt-1 text-sm text-base-content/60">You can skip this and change it later in Settings.</p>
+<form method="post" class="mt-6 space-y-4" novalidate>
+  {% csrf_token %}
+  {% for field in form %}
+    {% if field.name == "life_areas" %}
+      <fieldset>
+        <legend class="label-text mb-2 font-medium">{{ field.label }}</legend>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {% for choice in field %}
+          <label class="flex cursor-pointer items-center gap-3 rounded-btn border border-base-300 px-3 py-2 hover:bg-base-200">
+            {{ choice.tag }}<span class="text-sm">{{ choice.choice_label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+    {% else %}
+      {% include "components/field.html" with field=field %}
+    {% endif %}
+  {% endfor %}
+  <div class="flex items-center justify-between gap-3 pt-2">
+    <button type="submit" name="skip" value="1" class="btn btn-ghost" formnovalidate>Skip</button>
+    <button type="submit" class="btn btn-primary">{% if step == total %}Finish{% else %}Continue{% endif %}</button>
+  </div>
+</form>
+{% endblock %}

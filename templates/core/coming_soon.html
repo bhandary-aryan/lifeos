@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card-surface mx-auto max-w-xl p-10 text-center">
+  <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary"><i data-lucide="{{ icon }}" class="h-7 w-7"></i></span>
+  <h2 class="mt-4 text-xl font-semibold">{{ page_title }} isn't built yet</h2>
+  <p class="mt-2 text-sm text-base-content/70">{{ description }}</p>
+  <span class="badge badge-outline mt-4">Planned for {{ phase }}</span>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "auth_base.html" %}
+{% block title %}Create account{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold">Create your account</h1>
+<p class="mt-1 text-sm text-base-content/60">Your data is private to you. We only need an email and password to start.</p>
+<form method="post" class="mt-6 space-y-4" novalidate>
+  {% csrf_token %}
+  {% include "components/field.html" with field=form.email %}
+  {% include "components/field.html" with field=form.password1 %}
+  {% include "components/field.html" with field=form.password2 %}
+  <button type="submit" class="btn btn-primary w-full">Create account</button>
+</form>
+{% endblock %}
+{% block below_card %}
+<p class="mt-4 text-center text-sm text-base-content/70">Already registered? <a class="link link-primary font-medium" href="{% url 'accounts:login' %}">Sign in</a></p>
+{% endblock %}

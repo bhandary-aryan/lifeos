@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card-surface mx-auto max-w-lg border-error/40 p-6">
+  <h2 class="flex items-center gap-2 text-lg font-semibold text-error"><i data-lucide="alert-triangle" class="h-5 w-5"></i> Delete your account</h2>
+  <p class="mt-2 text-sm text-base-content/70">This permanently deletes your account and every record linked to it. Consider exporting your data first.</p>
+  <form method="post" class="mt-5 space-y-4" novalidate>
+    {% csrf_token %}
+    {% include "components/field.html" with field=form.password %}
+    <div>
+      <label class="flex cursor-pointer items-start gap-3">{{ form.confirm }}<span class="text-sm">{{ form.confirm.label }}</span></label>
+      {% for e in form.confirm.errors %}<p class="field-error" role="alert">{{ e }}</p>{% endfor %}
+    </div>
+    <div class="flex justify-end gap-2">
+      <a href="{% url 'accounts:settings' %}" class="btn btn-ghost btn-sm">Cancel</a>
+      <button type="submit" class="btn btn-error btn-sm">Permanently delete</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

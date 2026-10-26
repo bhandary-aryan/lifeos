@@ -1,0 +1,13 @@
+{% load static %}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  (function () {
+    var pref = "{{ theme_pref|default:'system' }}";
+    var t = pref === "system"
+      ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+      : pref;
+    document.documentElement.setAttribute("data-theme", "lifeos-" + t);
+  })();
+</script>
+<link rel="stylesheet" href="{% static 'css/app.css' %}">

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="space-y-6">
+  <section class="card-surface p-6">
+    <h2 class="text-base font-semibold">Profile</h2>
+    <form method="post" class="mt-4 max-w-md space-y-4" novalidate>
+      {% csrf_token %}<input type="hidden" name="section" value="profile">
+      <div class="form-control"><span class="label-text mb-1 font-medium">Email</span><input class="input input-bordered w-full" value="{{ request.user.email }}" disabled aria-label="Email (cannot be changed here)"></div>
+      {% include "components/field.html" with field=profile_form.display_name %}
+      <button type="submit" class="btn btn-primary btn-sm">Save profile</button>
+    </form>
+  </section>
+
+  <section class="card-surface p-6">
+    <h2 class="text-base font-semibold">Preferences</h2>
+    <form method="post" class="mt-4 grid gap-4 sm:grid-cols-2" novalidate>
+      {% csrf_token %}<input type="hidden" name="section" value="prefs">
+      {% for field in prefs_form %}{% include "components/field.html" with field=field %}{% endfor %}
+      <div class="sm:col-span-2"><button type="submit" class="btn btn-primary btn-sm">Save preferences</button></div>
+    </form>
+  </section>
+
+  <section class="card-surface p-6">
+    <h2 class="text-base font-semibold">Areas of life</h2>
+    <form method="post" class="mt-4" novalidate>
+      {% csrf_token %}<input type="hidden" name="section" value="areas">
+      <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        {% for choice in areas_form.life_areas %}
+        <label class="flex cursor-pointer items-center gap-3 rounded-btn border border-base-300 px-3 py-2 hover:bg-base-200">{{ choice.tag }}<span class="text-sm">{{ choice.choice_label }}</span></label>
+        {% endfor %}
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm mt-4">Save areas</button>
+    </form>
+  </section>
+
+  <section class="card-surface p-6">
+    <h2 class="text-base font-semibold">Your data</h2>
+    <p class="mt-1 text-sm text-base-content/60">Download everything {{ SITE_NAME }} holds about you as a JSON file.</p>
+    <a href="{% url 'accounts:export' %}" class="btn btn-outline btn-sm mt-4"><i data-lucide="download" class="h-4 w-4"></i> Export my data</a>
+  </section>
+
+  <section class="card-surface border-error/40 p-6">
+    <h2 class="text-base font-semibold text-error">Delete account</h2>
+    <p class="mt-1 text-sm text-base-content/60">Permanently removes your account and all associated data. This cannot be undone.</p>
+    <a href="{% url 'accounts:delete' %}" class="btn btn-error btn-outline btn-sm mt-4">Delete my account…</a>
+  </section>
+</div>
+{% endblock %}

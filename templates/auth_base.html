@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="lifeos-light">
+<head>
+  {% include "base_head.html" %}
+  <title>{% block title %}{{ page_title }}{% endblock %} · {{ SITE_NAME }}</title>
+</head>
+<body class="min-h-screen bg-base-200 font-sans text-base-content antialiased">
+<main class="flex min-h-screen items-center justify-center px-4 py-10">
+  <div class="w-full max-w-md">
+    <a href="/" class="mb-6 flex items-center justify-center gap-2 text-xl font-bold tracking-tight">
+      <span class="flex h-10 w-10 items-center justify-center rounded-btn bg-primary text-primary-content"><i data-lucide="compass" class="h-5 w-5"></i></span>
+      {{ SITE_NAME }}
+    </a>
+    <div class="card-surface p-6 sm:p-8">
+      {% include "components/messages.html" %}
+      {% block content %}{% endblock %}
+    </div>
+    {% block below_card %}{% endblock %}
+  </div>
+</main>
+<script src="{% static 'vendor/lucide.min.js' %}"></script>
+<script>document.addEventListener("DOMContentLoaded", function () { lucide.createIcons(); });</script>
+<script src="{% static 'vendor/alpine.min.js' %}" defer></script>
+</body>
+</html>

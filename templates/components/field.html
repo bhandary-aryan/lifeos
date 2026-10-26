@@ -1,0 +1,10 @@
+{# Usage: {% include "components/field.html" with field=form.email %} #}
+<div class="form-control w-full">
+  <label for="{{ field.id_for_label }}" class="label pb-1">
+    <span class="label-text font-medium">{{ field.label }}</span>
+    {% if not field.field.required %}<span class="label-text-alt text-base-content/50">Optional</span>{% endif %}
+  </label>
+  {{ field }}
+  {% if field.help_text %}<p class="mt-1 text-xs text-base-content/60">{{ field.help_text }}</p>{% endif %}
+  {% for error in field.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
+</div>
