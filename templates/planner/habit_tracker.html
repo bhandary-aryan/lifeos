@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="space-y-5">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="join">
+      <a class="btn btn-sm join-item" href="?week={{ prev_week|date:'Y-m-d' }}" aria-label="Previous week"><i data-lucide="chevron-left" class="h-4 w-4"></i></a>
+      <a class="btn btn-sm join-item" href="{% url 'planner:habits' %}">This week</a>
+      <a class="btn btn-sm join-item" href="?week={{ next_week|date:'Y-m-d' }}" aria-label="Next week"><i data-lucide="chevron-right" class="h-4 w-4"></i></a>
+    </div>
+    <a href="{% url 'planner:habit_create' %}" class="btn btn-primary btn-sm"><i data-lucide="plus" class="h-4 w-4"></i> New habit</a>
+  </div>
+
+  {% if not rows and not paused %}
+  <div class="card-surface p-10 text-center">
+    <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary"><i data-lucide="repeat" class="h-7 w-7"></i></span>
+    <h2 class="mt-4 text-lg font-semibold">No habits yet</h2>
+    <p class="mt-1 text-sm text-base-content/60">Track something you want to do regularly — daily, on chosen weekdays, or a number of times per week.</p>
+    <a href="{% url 'planner:habit_create' %}" class="btn btn-primary btn-sm mt-4">Create a habit</a>
+  </div>
+  {% endif %}
+
+  {% if rows %}
+  <div class="card-surface overflow-x-auto">
+    <table class="table">
+      <thead><tr><th>Habit</th>{% for d in days %}<th class="text-center text-xs {% if d == today %}text-primary{% endif %}">{{ d|date:"D" }}<br><span class="font-normal">{{ d|date:"j" }}</span></th>{% endfor %}<th class="text-center text-xs">Streak</th><th class="text-center text-xs">Week</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td class="min-w-[10rem]"><a href="{% url 'planner:habit_detail' r.habit.pk %}" class="font-medium hover:underline">{{ r.habit.name }}</a>
+            <p class="text-xs text-base-content/50">{% if r.habit.frequency == 'weekly' %}{{ r.habit.weekly_target }}× per week{% elif r.habit.frequency == 'weekdays' %}Selected days{% else %}Daily{% endif %}</p></td>
+          {% for c in r.cells %}
+          <td class="text-center">
+            {% if c.can_toggle %}
+            <form method="post" action="{% url 'planner:habit_log' r.habit.pk %}">{% csrf_token %}<input type="hidden" name="date" value="{{ c.date|date:'Y-m-d' }}"><input type="hidden" name="next" value="{{ next_url }}">
+              <button class="btn btn-circle btn-xs {% if c.done %}btn-success{% elif c.scheduled %}btn-outline{% else %}btn-ghost border border-dashed border-base-300{% endif %}" aria-label="{% if c.done %}Unmark{% else %}Mark{% endif %} {{ r.habit.name }} on {{ c.date|date:'l j F' }}" aria-pressed="{% if c.done %}true{% else %}false{% endif %}"><i data-lucide="check" class="h-3 w-3"></i></button>
+            </form>
+            {% else %}<span class="inline-block h-6 w-6 rounded-full {% if c.done %}bg-success/60{% else %}bg-base-200{% endif %}" aria-label="{% if c.done %}done{% else %}not available{% endif %}"></span>{% endif %}
+          </td>
+          {% endfor %}
+          <td class="text-center text-sm font-semibold tabular-nums">{{ r.stats.current_streak }}</td>
+          <td class="text-center text-xs tabular-nums">{{ r.stats.week_done }}/{{ r.stats.week_expected }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="text-xs text-base-content/50">Streak counts consecutive scheduled days (or weeks for weekly habits). Today never breaks a streak until the day is over.</p>
+  {% endif %}
+
+  {% if paused %}
+  <section class="card-surface p-5">
+    <h3 class="text-sm font-semibold">Paused habits</h3>
+    <ul class="mt-2 divide-y divide-base-300">
+      {% for r in paused %}<li class="flex items-center justify-between py-2 text-sm"><a href="{% url 'planner:habit_detail' r.habit.pk %}" class="hover:underline">{{ r.habit.name }}</a>
+        <form method="post" action="{% url 'planner:habit_pause' r.habit.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ next_url }}"><button class="btn btn-outline btn-xs">Resume</button></form></li>{% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

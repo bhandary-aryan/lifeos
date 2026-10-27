@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card-surface mx-auto max-w-xl p-6">
+  <h2 class="text-base font-semibold">Your life areas</h2>
+  <p class="mt-1 text-sm text-base-content/60">Used to group goals and habits. Removing one never deletes the goals in it.</p>
+  <ul class="mt-4 divide-y divide-base-300">
+    {% for a in areas %}
+    <li class="flex items-center justify-between py-2 text-sm">{{ a.name }}
+      <form method="post" action="{% url 'goals:area_delete' a.pk %}" onsubmit="return confirm('Remove {{ a.name|escapejs }}? Goals using it become uncategorised.')">{% csrf_token %}<button class="btn btn-ghost btn-xs text-error" aria-label="Remove {{ a.name }}"><i data-lucide="x" class="h-4 w-4"></i></button></form>
+    </li>
+    {% endfor %}
+  </ul>
+  <form method="post" class="mt-5 flex items-end gap-2" novalidate>{% csrf_token %}
+    <div class="flex-1">{% include "components/field.html" with field=form.name %}</div>
+    <button class="btn btn-primary btn-sm mb-0.5" type="submit">Add</button>
+  </form>
+  <a href="{% url 'goals:list' %}" class="btn btn-ghost btn-sm mt-4">Back to goals</a>
+</div>
+{% endblock %}

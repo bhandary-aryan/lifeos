@@ -15,3 +15,9 @@ class OwnedModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class Priority(models.TextChoices):
+    LOW = "low", "Low"
+    MEDIUM = "medium", "Medium"
+    HIGH = "high", "High"

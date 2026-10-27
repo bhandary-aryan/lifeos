@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="space-y-5">
+  {% include "planner/_tabs.html" %}
+  <div class="flex items-center justify-between">
+    <div class="join">
+      <a class="btn btn-sm join-item" href="?start={{ prev_week|date:'Y-m-d' }}" aria-label="Previous week"><i data-lucide="chevron-left" class="h-4 w-4"></i></a>
+      <a class="btn btn-sm join-item" href="{% url 'planner:week' %}">This week</a>
+      <a class="btn btn-sm join-item" href="?start={{ next_week|date:'Y-m-d' }}" aria-label="Next week"><i data-lucide="chevron-right" class="h-4 w-4"></i></a>
+    </div>
+    <p class="text-sm font-medium">{{ start|date:"j M" }} – {{ end|date:"j M Y" }}</p>
+  </div>
+  {% if any_over %}<div class="alert alert-warning text-sm" role="alert"><i data-lucide="alert-triangle" class="h-5 w-5"></i><span>Some days have more planned work than your available time. Open a task to move it — nothing is rescheduled automatically.</span></div>{% endif %}
+  <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+    {% for d in plan %}
+    <section class="card-surface p-4 {% if d.date == today %}ring-2 ring-primary/40{% endif %}" aria-label="{{ d.date|date:'l j F' }}">
+      <div class="flex items-center justify-between">
+        <a href="{% url 'planner:today' %}?date={{ d.date|date:'Y-m-d' }}" class="text-sm font-semibold hover:underline">{{ d.date|date:"D j M" }}</a>
+        <a href="{% url 'planner:task_create' %}?date={{ d.date|date:'Y-m-d' }}" class="btn btn-ghost btn-xs" aria-label="Add task on {{ d.date|date:'j M' }}"><i data-lucide="plus" class="h-3.5 w-3.5"></i></a>
+      </div>
+      <progress class="progress {% if d.over_by %}progress-error{% else %}progress-primary{% endif %} mt-2 h-1.5 w-full" value="{{ d.load_pct }}" max="100" aria-label="Load on {{ d.date|date:'l' }}"></progress>
+      <p class="mt-1 text-xs {% if d.over_by %}font-medium text-error{% else %}text-base-content/60{% endif %}">{{ d.planned_minutes }} / {{ d.available_minutes }} min{% if d.over_by %} · over by {{ d.over_by }}{% endif %}</p>
+      <ul class="mt-2 space-y-1">
+        {% for t in d.tasks %}
+        <li class="flex items-center gap-2 text-sm">
+          <span class="h-2 w-2 shrink-0 rounded-full {% if t.is_done %}bg-success{% elif t.due_date < today %}bg-error{% else %}bg-primary{% endif %}" aria-hidden="true"></span>
+          <a href="{% url 'planner:task_update' t.pk %}?next={{ next_url|urlencode }}" class="truncate hover:underline {% if t.is_done %}text-base-content/50 line-through{% endif %}">{{ t.title }}</a>
+          <span class="sr-only">{% if t.is_done %}completed{% elif t.due_date < today %}overdue{% else %}upcoming{% endif %}</span>
+        </li>
+        {% empty %}<li class="text-xs text-base-content/50">Free</li>{% endfor %}
+      </ul>
+    </section>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

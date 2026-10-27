@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="space-y-5">
+  {% include "planner/_tabs.html" %}
+  <div class="card-surface p-4">{% include "components/quick_task_form.html" with form=quick_form next_url=next_url %}</div>
+  <form method="get" class="flex flex-wrap items-end gap-2" role="search">
+    <input type="search" name="q" value="{{ f.q }}" placeholder="Search tasks…" class="input input-bordered input-sm w-48" aria-label="Search tasks">
+    {% if tab == "all" %}<select name="status" class="select select-bordered select-sm" aria-label="Status"><option value="">Any status</option>{% for v,l in statuses %}<option value="{{ v }}" {% if f.status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>{% endif %}
+    <select name="priority" class="select select-bordered select-sm" aria-label="Priority"><option value="">Any priority</option>{% for v,l in priorities %}<option value="{{ v }}" {% if f.priority == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+    <select name="goal" class="select select-bordered select-sm" aria-label="Goal"><option value="">Any goal</option>{% for g in goals %}<option value="{{ g.pk }}" {% if f.goal == g.pk|stringformat:"s" %}selected{% endif %}>{{ g.title|truncatechars:30 }}</option>{% endfor %}</select>
+    <select name="sort" class="select select-bordered select-sm" aria-label="Sort"><option value="due">Sort: due date</option><option value="priority" {% if f.sort == "priority" %}selected{% endif %}>Priority</option><option value="title" {% if f.sort == "title" %}selected{% endif %}>Title</option><option value="recent" {% if f.sort == "recent" %}selected{% endif %}>Newest</option></select>
+    <button class="btn btn-sm btn-outline" type="submit">Apply</button>
+    {% if qs %}<a href="." class="btn btn-sm btn-ghost">Clear</a>{% endif %}
+  </form>
+
+  <div class="card-surface px-5">
+    {% if page_obj.object_list %}
+    <ul class="divide-y divide-base-300">{% for task in page_obj.object_list %}{% include "components/task_row.html" with task=task next_url=next_url %}{% endfor %}</ul>
+    {% else %}
+    <div class="py-12 text-center">
+      <h2 class="text-base font-semibold">{% if qs %}No tasks match those filters{% elif tab == 'overdue' %}Nothing overdue{% elif tab == 'upcoming' %}Nothing upcoming{% else %}No tasks yet{% endif %}</h2>
+      <p class="mt-1 text-sm text-base-content/60">{% if qs %}Try clearing a filter.{% elif tab == 'overdue' %}You're all caught up.{% else %}Use the bar above to add your first task.{% endif %}</p>
+    </div>
+    {% endif %}
+  </div>
+  {% include "components/pager.html" %}
+</div>
+{% endblock %}

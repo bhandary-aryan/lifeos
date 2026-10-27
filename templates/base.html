@@ -23,15 +23,16 @@
           <p class="hidden text-xs text-base-content/60 sm:block">{% now "l, j F Y" %}</p>
         </div>
 
-        <!-- Quick add: modules arrive in later phases, so entries are disabled for now -->
+        <!-- Quick add: Phase 2 modules are live; finance entries stay disabled until Phase 3 -->
         <div class="dropdown dropdown-end">
           <button type="button" tabindex="0" class="btn btn-primary btn-sm gap-1" aria-haspopup="true">
             <i data-lucide="plus" class="h-4 w-4"></i><span class="hidden sm:inline">Quick add</span>
           </button>
           <ul tabindex="0" class="menu dropdown-content z-40 mt-2 w-60 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg">
+            <li><a href="{% url 'planner:task_create' %}"><i data-lucide="check-square" class="h-4 w-4"></i> Task</a></li>
+            <li><a href="{% url 'goals:create' %}"><i data-lucide="target" class="h-4 w-4"></i> Goal</a></li>
+            <li><a href="{% url 'planner:habit_create' %}"><i data-lucide="repeat" class="h-4 w-4"></i> Habit</a></li>
             <li class="menu-title">Available soon</li>
-            <li class="disabled"><span><i data-lucide="check-square" class="h-4 w-4"></i> Task <span class="badge badge-ghost badge-sm">Phase 2</span></span></li>
-            <li class="disabled"><span><i data-lucide="target" class="h-4 w-4"></i> Goal <span class="badge badge-ghost badge-sm">Phase 2</span></span></li>
             <li class="disabled"><span><i data-lucide="receipt" class="h-4 w-4"></i> Transaction <span class="badge badge-ghost badge-sm">Phase 3</span></span></li>
           </ul>
         </div>

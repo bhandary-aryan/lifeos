@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="space-y-5">
+  {% include "planner/_tabs.html" %}
+  <div class="flex items-center justify-between">
+    <div class="join">
+      <a class="btn btn-sm join-item" href="?date={{ prev_day|date:'Y-m-d' }}" aria-label="Previous day"><i data-lucide="chevron-left" class="h-4 w-4"></i></a>
+      <a class="btn btn-sm join-item" href="{% url 'planner:today' %}">Today</a>
+      <a class="btn btn-sm join-item" href="?date={{ next_day|date:'Y-m-d' }}" aria-label="Next day"><i data-lucide="chevron-right" class="h-4 w-4"></i></a>
+    </div>
+    <p class="text-sm font-medium">{{ day|date:"l, j F Y" }}</p>
+  </div>
+
+  <section class="card-surface p-5" aria-label="Time available">
+    <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
+      <span>Planned <strong>{{ planned }}</strong> of <strong>{{ available }}</strong> available minutes</span>
+      {% if unestimated %}<span class="text-xs text-base-content/60">{{ unestimated }} task{{ unestimated|pluralize }} without an estimate</span>{% endif %}
+    </div>
+    <progress class="progress {% if over_by %}progress-error{% else %}progress-primary{% endif %} mt-2 h-2 w-full" value="{{ load_pct }}" max="100" aria-label="Day load"></progress>
+    {% if over_by %}
+    <p class="mt-2 text-sm text-error" role="alert">Planned work exceeds your available time by {{ over_by }} minutes. You could move or shorten a task — nothing is changed automatically.</p>
+    {% endif %}
+  </section>
+
+  <div class="card-surface p-4">{% include "components/quick_task_form.html" with form=quick_form next_url=next_url %}</div>
+
+  {% if overdue %}
+  <section class="card-surface border-error/30 px-5 py-4">
+    <h3 class="text-sm font-semibold text-error">Overdue</h3>
+    <ul class="divide-y divide-base-300">{% for task in overdue %}{% include "components/task_row.html" with task=task next_url=next_url %}{% endfor %}</ul>
+  </section>
+  {% endif %}
+
+  <section class="card-surface px-5 py-4">
+    <h3 class="text-sm font-semibold">{% if day == today %}Due today{% else %}Due this day{% endif %}</h3>
+    {% if tasks %}<ul class="divide-y divide-base-300">{% for task in tasks %}{% include "components/task_row.html" with task=task next_url=next_url %}{% endfor %}</ul>
+    {% else %}<p class="py-6 text-center text-sm text-base-content/60">Nothing scheduled for this day.</p>{% endif %}
+  </section>
+</div>
+{% endblock %}

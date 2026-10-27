@@ -1,5 +1,6 @@
 import zoneinfo
 
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.db.models.functions import Lower
@@ -102,6 +103,11 @@ class Profile(models.Model):
     date_format = models.CharField(max_length=10, choices=DateFormat.choices, default=DateFormat.DMY)
     week_start = models.PositiveSmallIntegerField(choices=WeekStart.choices, default=WeekStart.MONDAY)
     theme = models.CharField(max_length=10, choices=Theme.choices, default=Theme.SYSTEM)
+    daily_available_minutes = models.PositiveSmallIntegerField(
+        default=480,
+        validators=[MinValueValidator(30), MaxValueValidator(1440)],
+        help_text="Time you realistically have for planned tasks each day.",
+    )
     life_areas = models.JSONField(default=list, blank=True)
     onboarding_completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

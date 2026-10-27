@@ -76,11 +76,12 @@ class ProfileForm(forms.ModelForm):
 class PreferencesForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ["currency", "timezone", "date_format", "week_start", "theme"]
+        fields = ["currency", "timezone", "date_format", "week_start", "daily_available_minutes", "theme"]
         widgets = {
-            f: forms.Select(attrs={"class": SELECT})
-            for f in ["currency", "timezone", "date_format", "week_start", "theme"]
+            **{f: forms.Select(attrs={"class": SELECT}) for f in ["currency", "timezone", "date_format", "week_start", "theme"]},
+            "daily_available_minutes": forms.NumberInput(attrs={"class": INPUT, "min": 30, "max": 1440, "step": 15}),
         }
+        labels = {"daily_available_minutes": "Available minutes per day"}
 
 
 class LifeAreasForm(forms.Form):

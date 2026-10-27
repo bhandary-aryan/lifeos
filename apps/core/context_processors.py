@@ -3,9 +3,9 @@ from django.urls import reverse
 
 NAV_ITEMS = [
     ("dashboard:home", "Dashboard", "layout-dashboard"),
-    ("core:goals", "My Goals", "target"),
-    ("core:planner", "Planner", "calendar-check"),
-    ("core:habits", "Habits", "repeat"),
+    ("goals:list", "My Goals", "target"),
+    ("planner:today", "Planner", "calendar-check"),
+    ("planner:habits", "Habits", "repeat"),
     ("core:finances", "Finances", "wallet"),
     ("core:future_plans", "Future Plans", "compass"),
     ("core:interests", "Hobbies & Bucket List", "sparkles"),
@@ -15,11 +15,14 @@ NAV_ITEMS = [
 
 
 def site(request):
-    current = getattr(getattr(request, "resolver_match", None), "view_name", "")
-    nav = [
-        {"url": reverse(name), "label": label, "icon": icon, "active": name == current}
-        for name, label, icon in NAV_ITEMS
-    ]
+    path = getattr(request, "path", "")
+    nav = []
+    for name, label, icon in NAV_ITEMS:
+        url = reverse(name)
+        # Dashboard is exact-match; other sections stay highlighted on their sub-pages.
+        active = path == url if name == "dashboard:home" else path.startswith(url) or (
+            name == "planner:today" and path.startswith("/planner/"))
+        nav.append({"url": url, "label": label, "icon": icon, "active": active})
     theme = "system"
     if getattr(request, "user", None) and request.user.is_authenticated:
         profile = getattr(request.user, "profile", None)

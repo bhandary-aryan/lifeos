@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="space-y-6">
+  <section class="card-surface p-6">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <p class="text-xs text-base-content/60"><a href="{% url 'goals:list' %}" class="link link-hover">My Goals</a>{% if goal.life_area %} · {{ goal.life_area.name }}{% endif %}</p>
+        <h2 class="mt-1 text-xl font-semibold">{{ goal.title }}</h2>
+        <div class="mt-2 flex flex-wrap gap-2 text-xs">
+          <span class="badge {% if goal.status == 'completed' %}badge-success{% else %}badge-outline{% endif %}">{{ goal.get_status_display }}</span>
+          <span class="badge badge-outline">{{ goal.get_priority_display }} priority</span>
+          <span class="badge badge-ghost">Progress: {{ goal.get_progress_mode_display }}</span>
+          {% if goal.start_date %}<span class="badge badge-ghost">Started {{ goal.start_date|date:"j M Y" }}</span>{% endif %}
+          {% if goal.target_date %}<span class="badge {% if goal.target_date < today and goal.status != 'completed' and goal.status != 'abandoned' %}badge-error badge-outline{% else %}badge-ghost{% endif %}">Target {{ goal.target_date|date:"j M Y" }}</span>{% endif %}
+          {% if goal.completed_at %}<span class="badge badge-success badge-outline">Completed {{ goal.completed_at|date:"j M Y" }}</span>{% endif %}
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <a href="{% url 'goals:update' goal.pk %}" class="btn btn-sm btn-outline">Edit</a>
+        <a href="{% url 'goals:delete' goal.pk %}" class="btn btn-sm btn-ghost text-error">Delete</a>
+      </div>
+    </div>
+    {% if goal.description %}<p class="mt-4 whitespace-pre-line text-sm text-base-content/80">{{ goal.description }}</p>{% endif %}
+    <div class="mt-5">{% include "components/progress.html" with value=progress label="Goal progress" %}</div>
+    <p class="mt-2 text-xs text-base-content/60">
+      {% if goal.progress_mode == 'milestone' %}{{ milestones_done }} of {{ milestones_total }} milestone{{ milestones_total|pluralize }} complete (weighted).
+      {% elif goal.progress_mode == 'task' %}Calculated from weighted tasks linked to this goal; cancelled tasks are ignored.
+      {% else %}Set manually. Change it any time by editing the goal.{% endif %}
+    </p>
+  </section>
+
+  <div class="grid gap-6 lg:grid-cols-3">
+    <div class="space-y-6 lg:col-span-2">
+      <section class="card-surface p-6">
+        <h3 class="text-base font-semibold">Milestones</h3>
+        {% if not milestones %}<p class="mt-2 text-sm text-base-content/60">No milestones yet. Add the key steps below.</p>{% endif %}
+        <ul class="mt-3 divide-y divide-base-300">
+          {% for m in milestones %}
+          <li class="py-4">
+            <div class="flex items-start gap-3">
+              <form method="post" action="{% url 'goals:milestone_toggle' m.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button class="btn btn-circle btn-xs mt-0.5 {% if m.status == 'completed' %}btn-success{% else %}btn-outline{% endif %}" aria-label="{% if m.status == 'completed' %}Reopen milestone {{ m.title }}{% else %}Complete milestone {{ m.title }}{% endif %}"><i data-lucide="check" class="h-3 w-3"></i></button>
+              </form>
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium {% if m.status == 'completed' %}text-base-content/50 line-through{% endif %}">{{ m.title }} <span class="text-xs font-normal text-base-content/50">· weight {{ m.weight }}</span></p>
+                <p class="text-xs {% if m.due_date and m.due_date < today and m.status != 'completed' %}font-medium text-error{% else %}text-base-content/60{% endif %}">{% if m.due_date %}Due {{ m.due_date|date:"j M Y" }}{% else %}No due date{% endif %}</p>
+                {% if m.tasks.all %}
+                <ul class="mt-2 divide-y divide-base-300/60 rounded-btn bg-base-200/60 px-3">
+                  {% for task in m.tasks.all %}{% include "components/task_row.html" with task=task next_url=request.get_full_path %}{% endfor %}
+                </ul>
+                {% endif %}
+              </div>
+              <div class="flex gap-1">
+                <a class="btn btn-ghost btn-xs" href="{% url 'goals:milestone_update' m.pk %}" aria-label="Edit milestone {{ m.title }}"><i data-lucide="pencil" class="h-3.5 w-3.5"></i></a>
+                <a class="btn btn-ghost btn-xs text-error" href="{% url 'goals:milestone_delete' m.pk %}" aria-label="Delete milestone {{ m.title }}"><i data-lucide="trash-2" class="h-3.5 w-3.5"></i></a>
+              </div>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        <form method="post" action="{% url 'goals:milestone_add' goal.pk %}" class="mt-4 grid gap-2 rounded-box border border-dashed border-base-300 p-4 sm:grid-cols-4" novalidate>
+          {% csrf_token %}
+          <div class="sm:col-span-2"><label class="label-text text-xs" for="ms-title">New milestone</label><input id="ms-title" name="title" class="input input-bordered input-sm w-full" required maxlength="160" placeholder="e.g. Finish module 1"></div>
+          <div><label class="label-text text-xs" for="ms-due">Due</label><input id="ms-due" type="date" name="due_date" class="input input-bordered input-sm w-full"></div>
+          <div><label class="label-text text-xs" for="ms-weight">Weight</label><input id="ms-weight" type="number" name="weight" value="1" min="1" max="1000" class="input input-bordered input-sm w-full"></div>
+          <input type="hidden" name="status" value="todo"><input type="hidden" name="order" value="{{ milestones|length }}">
+          <div class="sm:col-span-4 text-right"><button class="btn btn-primary btn-sm" type="submit">Add milestone</button></div>
+        </form>
+      </section>
+
+      <section class="card-surface p-6">
+        <h3 class="text-base font-semibold">Tasks</h3>
+        {% if loose_tasks %}
+        <ul class="mt-2 divide-y divide-base-300">{% for task in loose_tasks %}{% include "components/task_row.html" with task=task next_url=request.get_full_path %}{% endfor %}</ul>
+        {% else %}<p class="mt-2 text-sm text-base-content/60">No tasks linked directly to this goal. Tasks attached to milestones appear under them above.</p>{% endif %}
+        <div class="mt-4 rounded-box border border-dashed border-base-300 p-4">{% include "components/quick_task_form.html" with form=task_form next_url=request.get_full_path %}</div>
+        <p class="mt-2 text-xs text-base-content/50">To attach a task to a milestone, edit the task and choose the milestone.</p>
+      </section>
+    </div>
+
+    <aside class="space-y-6">
+      <section class="card-surface p-6">
+        <h3 class="text-base font-semibold">Remaining work</h3>
+        {% if remaining_milestones %}<ul class="mt-2 space-y-1 text-sm">{% for m in remaining_milestones %}<li class="flex justify-between gap-2"><span class="truncate">{{ m.title }}</span><span class="text-xs text-base-content/50">{% if m.due_date %}{{ m.due_date|date:"j M" }}{% endif %}</span></li>{% endfor %}</ul>
+        {% else %}<p class="mt-2 text-sm text-base-content/60">{% if milestones_total %}All milestones complete.{% else %}No milestones to complete.{% endif %}</p>{% endif %}
+      </section>
+      <section class="card-surface p-6">
+        <h3 class="text-base font-semibold">Upcoming deadlines</h3>
+        {% if upcoming %}<ul class="mt-2 space-y-2 text-sm">{% for kind, title, due in upcoming %}<li class="flex justify-between gap-2"><span class="truncate"><span class="text-xs text-base-content/50">{{ kind }}</span> {{ title }}</span><span class="text-xs {% if due < today %}font-medium text-error{% else %}text-base-content/60{% endif %}">{{ due|date:"j M" }}</span></li>{% endfor %}</ul>
+        {% else %}<p class="mt-2 text-sm text-base-content/60">Nothing due in the next 14 days.</p>{% endif %}
+      </section>
+      {% if goal.notes %}<section class="card-surface p-6"><h3 class="text-base font-semibold">Notes</h3><p class="mt-2 whitespace-pre-line text-sm text-base-content/80">{{ goal.notes }}</p></section>{% endif %}
+    </aside>
+  </div>
+</div>
+{% endblock %}

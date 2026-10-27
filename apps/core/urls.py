@@ -5,15 +5,6 @@ from .views import ComingSoonView
 app_name = "core"
 
 urlpatterns = [
-    path("goals/", ComingSoonView.as_view(
-        title="My Goals", phase="Phase 2", icon="target",
-        description="Goals, milestones and progress tracking."), name="goals"),
-    path("planner/", ComingSoonView.as_view(
-        title="Planner", phase="Phase 2", icon="calendar-check",
-        description="Tasks, schedule and weekly planning."), name="planner"),
-    path("habits/", ComingSoonView.as_view(
-        title="Habits", phase="Phase 2", icon="repeat",
-        description="Habit tracking with streaks and consistency stats."), name="habits"),
     path("finances/", ComingSoonView.as_view(
         title="Finances", phase="Phase 3", icon="wallet",
         description="Accounts, transactions, budgets, debts and savings goals."), name="finances"),

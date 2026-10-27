@@ -1,0 +1,5 @@
+{# include with value=<0-100> label=<optional text> #}
+<div class="flex items-center gap-3">
+  <progress class="progress {% if value >= 100 %}progress-success{% else %}progress-primary{% endif %} h-2 flex-1" value="{{ value }}" max="100" aria-label="{{ label|default:'Progress' }}"></progress>
+  <span class="w-10 text-right text-xs font-semibold tabular-nums">{{ value }}%</span>
+</div>

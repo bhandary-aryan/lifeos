@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card-surface mx-auto max-w-2xl p-6">
+  <form method="post" class="space-y-4" novalidate>
+    {% csrf_token %}
+    {% if next_param %}<input type="hidden" name="next" value="{{ next_param }}">{% endif %}
+    {% if form.non_field_errors %}<div class="alert alert-error text-sm" role="alert">{{ form.non_field_errors.0 }}</div>{% endif %}
+    <div class="grid gap-4 sm:grid-cols-2">
+      {% for field in form %}
+        {% if field.is_hidden %}{{ field }}{% else %}
+        <div class="{% if field.name in 'title description notes' or field.widget_type == 'checkboxselectmultiple' %}sm:col-span-2{% endif %}">
+          {% if field.widget_type == 'checkboxselectmultiple' %}
+          <fieldset>
+            <legend class="label-text mb-2 font-medium">{{ field.label }}</legend>
+            <div class="flex flex-wrap gap-2">
+              {% for choice in field %}<label class="flex cursor-pointer items-center gap-2 rounded-btn border border-base-300 px-3 py-1.5 text-sm hover:bg-base-200">{{ choice.tag }}{{ choice.choice_label }}</label>{% endfor %}
+            </div>
+            {% for e in field.errors %}<p class="field-error" role="alert">{{ e }}</p>{% endfor %}
+          </fieldset>
+          {% else %}{% include "components/field.html" with field=field %}{% endif %}
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+    <div class="flex justify-end gap-2 pt-2">
+      <a href="{{ cancel_url }}" class="btn btn-ghost btn-sm">Cancel</a>
+      <button type="submit" class="btn btn-primary btn-sm">Save</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

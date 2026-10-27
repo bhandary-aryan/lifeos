@@ -4,7 +4,7 @@ Personal life management platform: goals, planner, habits, finances, future plan
 Django monolith, PostgreSQL, server-rendered templates, Tailwind + DaisyUI, HTMX, Alpine.js, Chart.js, Lucide.
 The product name is configurable via `LIFEOS_SITE_NAME`.
 
-**Status:** Phase 1 (foundation) complete. See `docs/CHECKLIST.md`. Modules for later phases show an honest "not built yet" page.
+**Status:** Phases 1 (foundation) and 2 (goals, planner, habits) complete. See `docs/CHECKLIST.md`. Finance, future plans, interests and reviews show an honest "not built yet" page.
 
 ## Local setup
 ```bash
@@ -38,6 +38,8 @@ Tests run against real PostgreSQL (a throwaway `test_lifeos` database).
 - `config/` settings (`base`, `dev`, `prod`), URLs, WSGI/ASGI
 - `apps/core/` shared base (`OwnedModel`, `OwnerQuerysetMixin`, timezone services, nav, placeholders)
 - `apps/accounts/` user + profile, auth, onboarding, preferences, export, deletion
+- `apps/goals/` life areas, goals, milestones, progress services (`goals/services.py`)
+- `apps/planner/` tasks, habits, habit logs; capacity maths (`services.py`) and streak/consistency maths (`habit_services.py`)
 - `apps/dashboard/` summary service + dashboard view (totals will be computed in `services.py`, not templates)
 - Ownership: every private model inherits `OwnedModel`; views use `OwnerQuerysetMixin` so other users' objects return 404.
 - Time: datetimes stored in UTC, displayed in the user's timezone (middleware); use `core.services.local_today(user)` for calendar dates.
@@ -50,8 +52,16 @@ Run `python manage.py check --deploy`. Remaining responsibilities not handled by
 database backups, secret management, log shipping, rate limiting on login/reset endpoints, and a real SMTP provider.
 HSTS preload is opt-in (`DJANGO_HSTS_PRELOAD=true`) and is the one `check --deploy` warning left by default.
 
-## Known limitations (Phase 1)
-- Goals, planner, habits, finance, future plans, interests, reviews are not implemented yet.
-- Quick-add entries are disabled placeholders; no login throttling yet; password-reset email uses the console backend in dev.
+## Behaviour notes
+- Goal progress: one mode per goal. Milestone/task modes are weighted; cancelled tasks are ignored; a goal with nothing to measure shows 0%.
+- Habit streaks count scheduled days only; today never breaks a streak until it has passed. Pausing stops new days counting from the pause date and never deletes logs.
+- Week/day capacity warnings compare estimated minutes of open tasks with your "available minutes per day" setting (default 480). They are suggestions only.
+
+## Known limitations
+- Finance, future plans, interests, reviews are not implemented yet (Phases 3-5).
+- Recurring tasks, habit reminders, dashboard widget customisation and history charts are not implemented.
+- Habit statistics for a *past* period that contained a pause count the paused days as missed (pause intervals are not stored).
+- Habit weekly/monthly figures for "times per week" habits are an approximation for partial weeks/months.
+- The quick-add Transaction entry is a disabled placeholder; no login throttling yet; password-reset email uses the console backend in dev.
 - Email cannot be changed from Settings yet; no email verification at registration.
 - Light/dark rendering and mobile layout were checked via HTML/tests only, not visually in a browser.

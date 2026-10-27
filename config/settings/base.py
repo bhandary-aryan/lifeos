@@ -25,6 +25,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "apps.core",
     "apps.accounts",
+    "apps.goals",
+    "apps.planner",
     "apps.dashboard",
 ]
 

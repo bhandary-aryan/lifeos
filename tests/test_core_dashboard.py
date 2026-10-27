@@ -21,8 +21,8 @@ User = get_user_model()
 # ---------- dashboard ----------
 def test_dashboard_empty_state_shows_no_fabricated_numbers(auth_client):
     html = auth_client.get(reverse("dashboard:home")).content.decode()
-    assert "Nothing here is sample data" in html
-    assert "coming in phase" in html.lower()
+    assert "Nothing on it is sample data" in html
+    assert "coming in phase 3" in html.lower()
     assert "£" not in html and "$" not in html
 
 
@@ -30,6 +30,12 @@ def test_dashboard_onboarding_prompt_only_until_completed(auth_client, user):
     assert "Start setup" in auth_client.get(reverse("dashboard:home")).content.decode()
     user.profile.onboarding_completed = True; user.profile.save()
     assert "Start setup" not in auth_client.get(reverse("dashboard:home")).content.decode()
+
+
+def test_dashboard_empty_state_offers_real_first_actions(auth_client):
+    html = auth_client.get(reverse("dashboard:home")).content.decode()
+    for name in ("goals:create", "planner:task_create", "planner:habit_create"):
+        assert reverse(name) in html
 
 
 def test_dashboard_greets_by_display_name_and_shows_focus_areas(auth_client, user):
@@ -49,12 +55,12 @@ def test_greeting_boundaries(hour, expected):
 
 def test_dashboard_cards_link_to_modules(auth_client):
     html = auth_client.get(reverse("dashboard:home")).content.decode()
-    for name in ("core:planner", "core:goals", "core:finances", "core:habits"):
+    for name in ("goals:list", "planner:habits", "core:finances", "core:future_plans"):
         assert f'href="{reverse(name)}"' in html
 
 
 # ---------- navigation ----------
-NAV = ["dashboard:home", "core:goals", "core:planner", "core:habits", "core:finances",
+NAV = ["dashboard:home", "goals:list", "planner:today", "planner:habits", "core:finances",
        "core:future_plans", "core:interests", "core:reviews", "accounts:settings"]
 
 
@@ -74,7 +80,7 @@ def test_mobile_bottom_nav_and_drawer_present(auth_client):
 
 
 def test_current_page_marked_active(auth_client):
-    html = auth_client.get(reverse("core:goals")).content.decode()
+    html = auth_client.get(reverse("goals:list")).content.decode()
     assert 'aria-current="page"' in html
 
 

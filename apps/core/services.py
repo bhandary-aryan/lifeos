@@ -20,3 +20,23 @@ def local_now(user):
 def local_today(user):
     """The user's current calendar date (not the server's)."""
     return local_now(user).date()
+
+
+from django.db.models import Case, IntegerField, When  # noqa: E402
+
+PRIORITY_RANK = Case(
+    When(priority="high", then=0),
+    When(priority="medium", then=1),
+    default=2,
+    output_field=IntegerField(),
+)
+"""Annotate-able sort key: high < medium < low (alphabetical text order would be wrong)."""
+
+
+def parse_date(value, default=None):
+    import datetime as dt
+
+    try:
+        return dt.date.fromisoformat(value)
+    except (TypeError, ValueError):
+        return default

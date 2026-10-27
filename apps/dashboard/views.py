@@ -9,5 +9,5 @@ def home(request):
     return render(
         request,
         "dashboard/home.html",
-        {"page_title": "Dashboard", "summary": build_dashboard_summary(request.user)},
+        {"page_title": "Dashboard", "summary": build_dashboard_summary(request.user), "next_url": request.get_full_path()},
     )

@@ -1,0 +1,10 @@
+{# include with form, next_url #}
+<form method="post" action="{% url 'planner:quick_add' %}" class="flex flex-wrap items-end gap-2" novalidate>
+  {% csrf_token %}<input type="hidden" name="next" value="{{ next_url }}">
+  {% for f in form.hidden_fields %}{{ f }}{% endfor %}
+  <div class="min-w-[12rem] flex-1">{{ form.title }}</div>
+  <div>{{ form.due_date }}</div>
+  <div class="w-28">{{ form.priority }}</div>
+  <div class="w-20">{{ form.estimated_minutes }}</div>
+  <button type="submit" class="btn btn-primary">Add</button>
+</form>
