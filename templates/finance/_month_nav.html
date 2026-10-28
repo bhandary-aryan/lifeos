@@ -1,0 +1,6 @@
+{# needs: url_name, month_label, prev_month, next_month, currency (optional) #}
+<div class="join">
+  <a class="btn btn-sm join-item" href="?month={{ prev_month }}{% if currency %}&currency={{ currency }}{% endif %}" aria-label="Previous month"><i data-lucide="chevron-left" class="h-4 w-4"></i></a>
+  <span class="btn btn-sm join-item pointer-events-none">{{ month_label }}</span>
+  <a class="btn btn-sm join-item" href="?month={{ next_month }}{% if currency %}&currency={{ currency }}{% endif %}" aria-label="Next month"><i data-lucide="chevron-right" class="h-4 w-4"></i></a>
+</div>

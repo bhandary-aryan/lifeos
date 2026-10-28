@@ -1,0 +1,7 @@
+{% load money %}
+{% if r.paid_off %}
+<p class="mt-3 text-2xl font-semibold">{{ r.months }} month{{ r.months|pluralize }}</p>
+<p class="text-sm text-base-content/60">estimated time to be debt-free</p>
+<dl class="mt-3 grid grid-cols-2 gap-3 text-sm"><div><dt class="text-xs text-base-content/60">Estimated interest</dt><dd class="font-semibold tabular-nums">{{ r.total_interest|money:results.currency }}</dd></div><div><dt class="text-xs text-base-content/60">Total paid</dt><dd class="font-semibold tabular-nums">{{ r.total_paid|money:results.currency }}</dd></div></dl>
+<ol class="mt-3 list-decimal space-y-1 pl-5 text-sm">{% for o in r.order %}<li>{{ o.name }} — month {{ o.month }}</li>{% endfor %}</ol>
+{% else %}<p class="mt-3 text-sm text-warning" role="alert">Not paid off within {{ r.months }} months at this payment level — payments may not cover the interest. Try a higher monthly amount.</p>{% endif %}

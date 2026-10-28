@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.goals",
     "apps.planner",
+    "apps.finance",
     "apps.dashboard",
 ]
 

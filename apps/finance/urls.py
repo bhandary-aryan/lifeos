@@ -1,0 +1,41 @@
+from django.urls import path
+
+from . import views as v
+
+app_name = "finance"
+
+urlpatterns = [
+    path("finance/", v.overview, name="overview"),
+    path("finance/reports/", v.reports, name="reports"),
+    path("finance/accounts/", v.account_list, name="accounts"),
+    path("finance/accounts/new/", v.account_form, name="account_create"),
+    path("finance/accounts/<int:pk>/edit/", v.account_form, name="account_update"),
+    path("finance/accounts/<int:pk>/delete/", v.account_delete, name="account_delete"),
+    path("finance/categories/", v.categories, name="categories"),
+    path("finance/categories/<int:pk>/delete/", v.category_delete, name="category_delete"),
+    path("finance/transactions/", v.transaction_list, name="transactions"),
+    path("finance/transactions/new/", v.transaction_form, name="transaction_create"),
+    path("finance/transactions/export.csv", v.transactions_export, name="transactions_export"),
+    path("finance/transactions/<int:pk>/edit/", v.transaction_form, name="transaction_update"),
+    path("finance/transactions/<int:pk>/delete/", v.transaction_delete, name="transaction_delete"),
+    path("finance/budgets/", v.budget_list, name="budgets"),
+    path("finance/budgets/new/", v.budget_form, name="budget_create"),
+    path("finance/budgets/<int:pk>/edit/", v.budget_form, name="budget_update"),
+    path("finance/budgets/<int:pk>/delete/", v.budget_delete, name="budget_delete"),
+    path("finance/debts/", v.debt_list, name="debts"),
+    path("finance/debts/new/", v.debt_form, name="debt_create"),
+    path("finance/debts/planner/", v.debt_planner, name="debt_planner"),
+    path("finance/debts/<int:pk>/", v.debt_detail, name="debt_detail"),
+    path("finance/debts/<int:pk>/edit/", v.debt_form, name="debt_update"),
+    path("finance/debts/<int:pk>/delete/", v.debt_delete, name="debt_delete"),
+    path("finance/debts/<int:pk>/drawdowns/add/", v.drawdown_add, name="drawdown_add"),
+    path("finance/drawdowns/<int:pk>/delete/", v.drawdown_delete, name="drawdown_delete"),
+    path("finance/savings/", v.savings_list, name="savings"),
+    path("finance/savings/new/", v.savings_form, name="savings_create"),
+    path("finance/savings/<int:pk>/", v.savings_detail, name="savings_detail"),
+    path("finance/savings/<int:pk>/edit/", v.savings_form, name="savings_update"),
+    path("finance/savings/<int:pk>/delete/", v.savings_delete, name="savings_delete"),
+    path("finance/savings/<int:goal_pk>/contribute/", v.contribution_form, name="contribution_create"),
+    path("finance/contributions/<int:pk>/edit/", v.contribution_form, name="contribution_update"),
+    path("finance/contributions/<int:pk>/delete/", v.contribution_delete, name="contribution_delete"),
+]

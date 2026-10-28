@@ -3,6 +3,7 @@
 <div class="card-surface mx-auto max-w-lg border-error/40 p-6">
   <h2 class="flex items-center gap-2 text-lg font-semibold text-error"><i data-lucide="trash-2" class="h-5 w-5"></i> Delete this {{ noun }}?</h2>
   <p class="mt-2 text-sm text-base-content/70"><strong>{{ object }}</strong> will be permanently deleted. This can't be undone.</p>
+  {% if extra %}<p class="mt-2 text-sm text-warning" role="note">{{ extra }}</p>{% endif %}
   <form method="post" class="mt-5 flex justify-end gap-2">
     {% csrf_token %}
     <a href="{{ cancel_url }}" class="btn btn-ghost btn-sm">Cancel</a>

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load money %}
+{% block content %}
+{% include "finance/_subnav.html" %}
+<div class="space-y-4">
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <form method="get" class="flex flex-1 flex-wrap items-end gap-2" role="search">
+      <input type="search" name="q" value="{{ f.q }}" placeholder="Search description, category…" class="input input-bordered input-sm w-52" aria-label="Search transactions">
+      <select name="type" class="select select-bordered select-sm" aria-label="Type"><option value="">All types</option>{% for v,l in types %}<option value="{{ v }}" {% if f.type == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+      <select name="account" class="select select-bordered select-sm" aria-label="Account"><option value="">All accounts</option>{% for a in accounts %}<option value="{{ a.pk }}" {% if f.account == a.pk|stringformat:"s" %}selected{% endif %}>{{ a.name }}</option>{% endfor %}</select>
+      <select name="category" class="select select-bordered select-sm" aria-label="Category"><option value="">All categories</option>{% for c in categories %}<option value="{{ c.pk }}" {% if f.category == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>
+      <label class="text-xs">From <input type="date" name="date_from" value="{{ f.date_from }}" class="input input-bordered input-sm"></label>
+      <label class="text-xs">To <input type="date" name="date_to" value="{{ f.date_to }}" class="input input-bordered input-sm"></label>
+      <select name="sort" class="select select-bordered select-sm" aria-label="Sort"><option value="">Newest first</option><option value="date" {% if f.sort == "date" %}selected{% endif %}>Oldest first</option><option value="amount" {% if f.sort == "amount" %}selected{% endif %}>Largest first</option><option value="amount_asc" {% if f.sort == "amount_asc" %}selected{% endif %}>Smallest first</option></select>
+      <button class="btn btn-sm btn-outline" type="submit">Apply</button>{% if qs %}<a href="{% url 'finance:transactions' %}" class="btn btn-sm btn-ghost">Clear</a>{% endif %}
+    </form>
+    <div class="flex gap-2"><a href="{% url 'finance:transactions_export' %}?{{ qs }}" class="btn btn-sm btn-ghost"><i data-lucide="download" class="h-4 w-4"></i> CSV</a>
+      <a href="{% url 'finance:transaction_create' %}" class="btn btn-sm btn-primary"><i data-lucide="plus" class="h-4 w-4"></i> New</a></div>
+  </div>
+
+  {% if page_obj.object_list %}
+  <div class="card-surface overflow-x-auto">
+    <table class="table"><thead><tr><th>Date</th><th>Details</th><th>Account</th><th class="text-right">Amount</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>
+      {% for t in page_obj.object_list %}
+      <tr>
+        <td class="whitespace-nowrap text-sm">{{ t.date|date:"j M Y" }}</td>
+        <td><p class="text-sm font-medium">{% if t.type == 'transfer' %}Transfer{% elif t.type == 'debt_payment' %}Payment to {{ t.debt.creditor }}{% else %}{{ t.description|default:t.get_type_display }}{% endif %}
+          {% if t.is_linked_to_savings %}<span class="badge badge-info badge-outline badge-sm">Savings</span>{% endif %}</p>
+          <p class="text-xs text-base-content/60">{{ t.get_type_display }}{% if t.category %} · {{ t.category.name }}{% endif %}{% if t.type == 'debt_payment' %} · principal {{ t.principal_amount|money:t.account.currency }}, interest {{ t.interest_amount|money:t.account.currency }}{% endif %}{% if t.type != 'income' and t.type != 'expense' and t.description %} · {{ t.description }}{% endif %}</p></td>
+        <td class="text-sm">{{ t.account.name }}{% if t.destination_account %} → {{ t.destination_account.name }}{% endif %}</td>
+        <td class="whitespace-nowrap text-right font-medium tabular-nums {% if t.type == 'income' %}text-success{% endif %}">{% if t.type == 'income' %}+{% elif t.type == 'expense' or t.type == 'debt_payment' %}−{% endif %}{{ t.amount|money:t.account.currency }}</td>
+        <td class="whitespace-nowrap text-right">{% if t.is_linked_to_savings %}<a class="btn btn-ghost btn-xs" href="{% url 'finance:savings_detail' t.savings_contribution.goal_id %}">Goal</a>{% else %}
+          <a class="btn btn-ghost btn-xs" href="{% url 'finance:transaction_update' t.pk %}" aria-label="Edit transaction"><i data-lucide="pencil" class="h-3.5 w-3.5"></i></a>
+          <a class="btn btn-ghost btn-xs text-error" href="{% url 'finance:transaction_delete' t.pk %}" aria-label="Delete transaction"><i data-lucide="trash-2" class="h-3.5 w-3.5"></i></a>{% endif %}</td>
+      </tr>{% endfor %}
+    </tbody></table>
+  </div>
+  {% include "components/pager.html" %}
+  {% else %}
+  <div class="card-surface p-10 text-center"><h2 class="text-lg font-semibold">{% if qs %}No transactions match those filters{% else %}No transactions yet{% endif %}</h2>
+    <p class="mt-1 text-sm text-base-content/60">{% if qs %}Try clearing a filter.{% else %}Record income, spending, transfers and debt payments here.{% endif %}</p>
+    {% if not qs %}<a href="{% url 'finance:transaction_create' %}" class="btn btn-primary btn-sm mt-4">Add a transaction</a>{% endif %}</div>
+  {% endif %}
+</div>
+{% endblock %}

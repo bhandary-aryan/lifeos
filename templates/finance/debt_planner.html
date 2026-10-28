@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load money %}
+{% block content %}
+{% include "finance/_subnav.html" %}
+<div class="space-y-6">
+  <section class="card-surface p-6"><h2 class="text-base font-semibold">Repayment planner</h2>
+    <p class="mt-1 text-sm text-base-content/60">Compare paying the highest-interest debt first (avalanche) with the smallest balance first (snowball). Only active debts in the chosen currency are included.</p>
+    <form method="get" class="mt-4 grid gap-4 sm:grid-cols-3 sm:items-end" novalidate>{% include "components/field.html" with field=form.currency %}{% include "components/field.html" with field=form.monthly_budget %}<button class="btn btn-primary btn-sm" type="submit">Compare</button></form></section>
+  <div class="alert alert-info text-sm" role="note"><i data-lucide="info" class="h-5 w-5"></i><span><strong>Estimates only.</strong> These projections assume fixed rates, monthly interest of rate ÷ 12 and the same payment every month. They are not personalised financial advice and real lenders may calculate differently.</span></div>
+  {% if results %}
+    {% if not results.count %}<div class="card-surface p-8 text-center text-sm text-base-content/60">You have no active debts with an outstanding balance in {{ results.currency }}.</div>
+    {% elif results.avalanche.insufficient_budget %}<div class="alert alert-warning text-sm" role="alert">Your monthly amount ({{ results.budget|money:results.currency }}) is below the combined minimum payments ({{ results.avalanche.minimum_total|money:results.currency }}). Increase it to compare strategies.</div>
+    {% else %}
+    <div class="grid gap-4 md:grid-cols-2">
+      <section class="card-surface p-5"><h3 class="font-semibold">Avalanche <span class="text-xs font-normal text-base-content/60">highest interest first</span></h3>{% with r=results.avalanche %}{% include "finance/_plan_result.html" %}{% endwith %}</section>
+      <section class="card-surface p-5"><h3 class="font-semibold">Snowball <span class="text-xs font-normal text-base-content/60">smallest balance first</span></h3>{% with r=results.snowball %}{% include "finance/_plan_result.html" %}{% endwith %}</section>
+    </div>{% endif %}
+  {% endif %}
+</div>
+{% endblock %}

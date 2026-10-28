@@ -71,3 +71,55 @@ def log_habit(db):
         for d in dates:
             HabitLog.objects.create(owner=habit.owner, habit=habit, date=d)
     return _log
+
+
+# ---------------- finance fixtures ----------------
+from decimal import Decimal as _D  # noqa: E402
+
+from apps.finance import services as fin  # noqa: E402
+from apps.finance.models import Account, Category, Debt, SavingsGoal, Transaction  # noqa: E402
+
+
+def money(v):
+    return _D(str(v))
+
+
+@pytest.fixture
+def make_account(db):
+    def _make(owner, name="Current", opening="0", currency="GBP", account_type="current", **kw):
+        return Account.objects.create(owner=owner, name=name, opening_balance=money(opening), currency=currency, account_type=account_type, **kw)
+    return _make
+
+
+@pytest.fixture
+def cat(db):
+    def _cat(owner, name, kind="expense"):
+        return Category.objects.get(owner=owner, name=name, kind=kind)
+    return _cat
+
+
+@pytest.fixture
+def make_tx(db):
+    """Creates transactions through the real validated save path."""
+    def _make(owner, type, amount, account, date=None, **kw):
+        tx = Transaction(owner=owner, type=type, amount=money(amount), account=account, date=date or local_today(owner), **kw)
+        for f in ("principal_amount", "interest_amount"):
+            if f in kw:
+                setattr(tx, f, money(kw[f]))
+        return fin.save_transaction(tx)
+    return _make
+
+
+@pytest.fixture
+def make_debt(db):
+    def _make(owner, creditor="Bank loan", original="1000", currency="GBP", **kw):
+        kw.setdefault("start_date", local_today(owner) - dt.timedelta(days=90))
+        return Debt.objects.create(owner=owner, creditor=creditor, original_amount=money(original), currency=currency, **kw)
+    return _make
+
+
+@pytest.fixture
+def make_savings(db):
+    def _make(owner, name="Emergency fund", target="1000", **kw):
+        return SavingsGoal.objects.create(owner=owner, name=name, target_amount=money(target), **kw)
+    return _make

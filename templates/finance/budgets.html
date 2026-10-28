@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load money %}
+{% block content %}
+{% include "finance/_subnav.html" %}
+<div class="space-y-4">
+  <div class="flex flex-wrap items-center justify-between gap-3">{% include "finance/_month_nav.html" %}
+    <a href="{% url 'finance:budget_create' %}?month={{ year }}-{{ month|stringformat:'02d' }}" class="btn btn-primary btn-sm"><i data-lucide="plus" class="h-4 w-4"></i> New budget</a></div>
+  {% if rows %}
+  <div class="card-surface divide-y divide-base-300">
+    {% for b in rows %}
+    <div class="px-5 py-4">
+      <div class="flex flex-wrap items-center justify-between gap-2"><p class="font-medium">{{ b.budget.category.name }}</p>
+        <div class="flex items-center gap-2"><span class="text-sm tabular-nums">{{ b.spent|money:b.budget.currency }} of {{ b.limit|money:b.budget.currency }}</span>
+          <a class="btn btn-ghost btn-xs" href="{% url 'finance:budget_update' b.budget.pk %}" aria-label="Edit budget"><i data-lucide="pencil" class="h-3.5 w-3.5"></i></a>
+          <a class="btn btn-ghost btn-xs text-error" href="{% url 'finance:budget_delete' b.budget.pk %}" aria-label="Delete budget"><i data-lucide="trash-2" class="h-3.5 w-3.5"></i></a></div></div>
+      <progress class="progress {% if b.state == 'over' %}progress-error{% elif b.state == 'warning' %}progress-warning{% else %}progress-primary{% endif %} mt-2 h-2.5 w-full" value="{{ b.pct }}" max="100" aria-label="{{ b.budget.category.name }} budget used"></progress>
+      <p class="mt-1 text-xs {% if b.state == 'over' %}font-medium text-error{% elif b.state == 'warning' %}text-warning{% else %}text-base-content/60{% endif %}">{{ b.pct }}% used ·
+        {% if b.state == 'over' %}over budget by {{ b.remaining|abs_val|money:b.budget.currency }}{% elif b.state == 'warning' %}approaching the limit, {{ b.remaining|money:b.budget.currency }} left{% else %}{{ b.remaining|money:b.budget.currency }} remaining{% endif %}</p>
+    </div>{% endfor %}
+  </div>
+  <p class="text-xs text-base-content/50">Spending excludes transfers and debt principal repayments; debt interest is counted under "Debt interest".</p>
+  {% else %}
+  <div class="card-surface p-10 text-center"><h2 class="text-lg font-semibold">No budgets for {{ month_label }}</h2><p class="mt-1 text-sm text-base-content/60">Set a monthly limit for a spending category to track it here.</p><a href="{% url 'finance:budget_create' %}?month={{ year }}-{{ month|stringformat:'02d' }}" class="btn btn-primary btn-sm mt-4">Create a budget</a></div>
+  {% endif %}
+</div>
+{% endblock %}

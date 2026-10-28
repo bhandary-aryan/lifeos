@@ -77,7 +77,7 @@ def test_logout_requires_post_and_ends_session(auth_client):
 # ---------- anonymous access ----------
 @pytest.mark.parametrize("name", [
     "dashboard:home", "accounts:settings", "accounts:export", "accounts:delete",
-    "goals:list", "planner:today", "planner:habits", "core:finances",
+    "goals:list", "planner:today", "planner:habits", "finance:overview",
     "core:future_plans", "core:interests", "core:reviews",
 ])
 def test_private_pages_redirect_anonymous(client, name):

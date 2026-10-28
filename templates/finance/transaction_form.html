@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card-surface mx-auto max-w-2xl p-6" x-data="{ type: '{{ start_type }}' }">
+  <form method="post" class="space-y-4" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="alert alert-error text-sm" role="alert">{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>{% include "components/field.html" with field=form.type %}</div>
+      <div>{% include "components/field.html" with field=form.date %}</div>
+      <div>{% include "components/field.html" with field=form.amount %}</div>
+      <div>{% include "components/field.html" with field=form.account %}</div>
+      <div x-show="type === 'transfer'" x-cloak>{% include "components/field.html" with field=form.destination_account %}</div>
+      <div x-show="type === 'income' || type === 'expense'" x-cloak>{% include "components/field.html" with field=form.category %}</div>
+      <div x-show="type === 'debt_payment'" x-cloak class="sm:col-span-2">{% include "components/field.html" with field=form.debt %}</div>
+      <div x-show="type === 'debt_payment'" x-cloak>{% include "components/field.html" with field=form.principal_amount %}</div>
+      <div x-show="type === 'debt_payment'" x-cloak>{% include "components/field.html" with field=form.interest_amount %}</div>
+      <div class="sm:col-span-2">{% include "components/field.html" with field=form.description %}</div>
+    </div>
+    <p class="text-xs text-base-content/60" x-show="type === 'transfer'" x-cloak>A transfer moves money between your own accounts. It is not income or spending.</p>
+    <p class="text-xs text-base-content/60" x-show="type === 'debt_payment'" x-cloak>Principal + interest must equal the amount. Principal reduces the debt; only the interest counts as spending.</p>
+    <div class="flex justify-end gap-2 pt-2"><a href="{{ cancel_url }}" class="btn btn-ghost btn-sm">Cancel</a><button type="submit" class="btn btn-primary btn-sm">Save</button></div>
+  </form>
+</div>
+{% endblock %}

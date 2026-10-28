@@ -121,6 +121,8 @@ def test_dashboard_query_count_is_bounded_and_flat(auth_client, user, make_task,
     assert len(large) < 30
 
 
-def test_finance_card_is_honestly_labelled_not_built(auth_client):
+def test_finance_prompt_shown_until_an_account_exists(auth_client, make_account, user):
+    assert "Add an account to start tracking" in auth_client.get(reverse("dashboard:home")).content.decode()
+    make_account(user)
     html = auth_client.get(reverse("dashboard:home")).content.decode()
-    assert "Finance tracking is coming in Phase 3" in html
+    assert "Add an account to start tracking" not in html and "Finances this month" in html

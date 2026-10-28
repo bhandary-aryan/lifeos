@@ -12,6 +12,9 @@ def export_user_data(user):
     from apps.goals.models import Goal, LifeArea, Milestone
     from apps.planner.models import Habit, HabitLog, Task
 
+    from apps.finance.models import (
+        Account, Budget, Category, Debt, DebtDrawdown, SavingsContribution, SavingsGoal, Transaction)
+
     p = user.profile
     iso = lambda v: v.isoformat() if v else None  # noqa: E731
     return {
@@ -67,6 +70,30 @@ def export_user_data(user):
             }
             for h in Habit.objects.filter(owner=user)
         ],
+        "finance": {
+            "accounts": [{"id": a.pk, "name": a.name, "type": a.account_type, "currency": a.currency,
+                          "opening_balance": str(a.opening_balance), "is_active": a.is_active}
+                         for a in Account.objects.filter(owner=user)],
+            "categories": [{"id": c.pk, "name": c.name, "kind": c.kind} for c in Category.objects.filter(owner=user)],
+            "transactions": [{"id": t.pk, "type": t.type, "date": iso(t.date), "amount": str(t.amount), "account_id": t.account_id,
+                              "destination_account_id": t.destination_account_id, "category_id": t.category_id,
+                              "description": t.description, "debt_id": t.debt_id, "principal": str(t.principal_amount),
+                              "interest": str(t.interest_amount)} for t in Transaction.objects.filter(owner=user)],
+            "debts": [{"id": d.pk, "creditor": d.creditor, "description": d.description, "currency": d.currency,
+                       "original_amount": str(d.original_amount), "interest_rate": str(d.interest_rate),
+                       "minimum_payment": str(d.minimum_payment), "due_day": d.due_day, "start_date": iso(d.start_date),
+                       "expected_payoff_date": iso(d.expected_payoff_date), "status": d.status, "notes": d.notes}
+                      for d in Debt.objects.filter(owner=user)],
+            "debt_drawdowns": [{"debt_id": x.debt_id, "date": iso(x.date), "amount": str(x.amount), "note": x.note}
+                               for x in DebtDrawdown.objects.filter(owner=user)],
+            "budgets": [{"category_id": b.category_id, "year": b.year, "month": b.month, "currency": b.currency,
+                         "limit_amount": str(b.limit_amount)} for b in Budget.objects.filter(owner=user)],
+            "savings_goals": [{"id": g.pk, "name": g.name, "currency": g.currency, "target_amount": str(g.target_amount),
+                               "target_date": iso(g.target_date), "priority": g.priority, "status": g.status, "notes": g.notes}
+                              for g in SavingsGoal.objects.filter(owner=user)],
+            "savings_contributions": [{"goal_id": c.goal_id, "date": iso(c.date), "amount": str(c.amount), "note": c.note,
+                                       "transfer_id": c.transfer_id} for c in SavingsContribution.objects.filter(owner=user)],
+        },
         "habit_logs": [
             {"habit_id": l.habit_id, "date": iso(l.date), "note": l.note}
             for l in HabitLog.objects.filter(owner=user)

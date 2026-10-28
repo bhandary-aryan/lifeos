@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load money %}
+{% block content %}
+{% include "finance/_subnav.html" %}
+<div class="space-y-4">
+  <div class="flex justify-end"><a href="{% url 'finance:savings_create' %}" class="btn btn-primary btn-sm"><i data-lucide="plus" class="h-4 w-4"></i> New savings goal</a></div>
+  {% if goals %}
+  <div class="grid gap-4 sm:grid-cols-2">
+    {% for g in goals %}
+    <a href="{% url 'finance:savings_detail' g.pk %}" class="card-surface block p-5 hover:shadow-md">
+      <div class="flex items-start justify-between gap-2"><h3 class="font-semibold">{{ g.name }}</h3><span class="badge badge-sm {% if g.plan.state == 'achieved' %}badge-success{% else %}badge-outline{% endif %}">{% if g.plan.state == 'achieved' %}Achieved{% else %}{{ g.get_status_display }}{% endif %}</span></div>
+      <p class="mt-3 text-xl font-semibold tabular-nums">{{ g.current|money:g.currency }} <span class="text-sm font-normal text-base-content/60">of {{ g.target_amount|money:g.currency }}</span></p>
+      <div class="mt-2">{% include "components/progress.html" with value=g.pct label=g.name %}</div>
+      <p class="mt-2 text-xs {% if g.plan.state == 'overdue' %}font-medium text-error{% else %}text-base-content/60{% endif %}">
+        {% if g.plan.state == 'achieved' %}Target reached{% elif g.plan.state == 'overdue' %}Target date passed — update the plan{% elif g.plan.state == 'no_date' %}No target date set{% else %}About {{ g.plan.monthly|money:g.currency }}/month to reach it by {{ g.target_date|date:"j M Y" }}{% endif %}</p>
+    </a>{% endfor %}
+  </div>
+  {% else %}
+  <div class="card-surface p-10 text-center"><h2 class="text-lg font-semibold">No savings goals yet</h2><p class="mt-1 text-sm text-base-content/60">Set a target and record contributions to see progress and the monthly amount you'd need.</p><a href="{% url 'finance:savings_create' %}" class="btn btn-primary btn-sm mt-4">Create a savings goal</a></div>
+  {% endif %}
+</div>
+{% endblock %}

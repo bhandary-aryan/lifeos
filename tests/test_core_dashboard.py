@@ -22,7 +22,7 @@ User = get_user_model()
 def test_dashboard_empty_state_shows_no_fabricated_numbers(auth_client):
     html = auth_client.get(reverse("dashboard:home")).content.decode()
     assert "Nothing on it is sample data" in html
-    assert "coming in phase 3" in html.lower()
+    assert "coming in phase 4" in html.lower()
     assert "£" not in html and "$" not in html
 
 
@@ -55,12 +55,12 @@ def test_greeting_boundaries(hour, expected):
 
 def test_dashboard_cards_link_to_modules(auth_client):
     html = auth_client.get(reverse("dashboard:home")).content.decode()
-    for name in ("goals:list", "planner:habits", "core:finances", "core:future_plans"):
+    for name in ("goals:list", "planner:habits", "finance:overview", "core:future_plans"):
         assert f'href="{reverse(name)}"' in html
 
 
 # ---------- navigation ----------
-NAV = ["dashboard:home", "goals:list", "planner:today", "planner:habits", "core:finances",
+NAV = ["dashboard:home", "goals:list", "planner:today", "planner:habits", "finance:overview",
        "core:future_plans", "core:interests", "core:reviews", "accounts:settings"]
 
 
@@ -85,8 +85,8 @@ def test_current_page_marked_active(auth_client):
 
 
 def test_placeholder_pages_say_they_are_not_built(auth_client):
-    html = auth_client.get(reverse("core:finances")).content.decode()
-    assert "isn't built yet" in html and "Phase 3" in html
+    html = auth_client.get(reverse("core:reviews")).content.decode()
+    assert "isn't built yet" in html and "Phase 5" in html
 
 
 def test_quick_add_entries_are_disabled_not_fake(auth_client):

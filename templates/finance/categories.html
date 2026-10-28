@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "finance/_subnav.html" %}
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="card-surface p-5"><h3 class="text-base font-semibold">Income categories</h3>
+    <ul class="mt-2 divide-y divide-base-300">{% for c in income %}<li class="flex items-center justify-between py-2 text-sm">{{ c.name }}
+      <form method="post" action="{% url 'finance:category_delete' c.pk %}" onsubmit="return confirm('Delete {{ c.name|escapejs }}? Its transactions become uncategorised.')">{% csrf_token %}<button class="btn btn-ghost btn-xs text-error" aria-label="Delete {{ c.name }}"><i data-lucide="x" class="h-4 w-4"></i></button></form></li>{% endfor %}</ul></section>
+  <section class="card-surface p-5"><h3 class="text-base font-semibold">Expense categories</h3>
+    <ul class="mt-2 divide-y divide-base-300">{% for c in expense %}<li class="flex items-center justify-between py-2 text-sm"><span>{{ c.name }}{% if c.is_system %} <span class="badge badge-ghost badge-sm">managed</span>{% endif %}</span>
+      {% if not c.is_system %}<form method="post" action="{% url 'finance:category_delete' c.pk %}" onsubmit="return confirm('Delete {{ c.name|escapejs }}? Its transactions become uncategorised and its budgets are removed.')">{% csrf_token %}<button class="btn btn-ghost btn-xs text-error" aria-label="Delete {{ c.name }}"><i data-lucide="x" class="h-4 w-4"></i></button></form>{% endif %}</li>{% endfor %}</ul></section>
+  <section class="card-surface p-5"><h3 class="text-base font-semibold">Add a category</h3>
+    <form method="post" class="mt-3 space-y-3" novalidate>{% csrf_token %}{% include "components/field.html" with field=form.name %}{% include "components/field.html" with field=form.kind %}<button class="btn btn-primary btn-sm" type="submit">Add</button></form></section>
+</div>
+{% endblock %}

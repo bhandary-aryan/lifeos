@@ -26,7 +26,24 @@
 - [ ] Habit reminder preference, task habit/life-area association – NOT implemented
 - [ ] Dashboard widget hide/rearrange – NOT implemented
 - [ ] Charts for goal-completion and habit history – deferred to Phase 5 insights
-## Phase 3 – finance  [todo]
+## Phase 3 – finance  [done, with listed gaps]
+- [x] Decimal(14,2) money everywhere; balances derived (never stored); DB CHECK constraints per transaction type
+- [x] Accounts (6 types, per-account currency, opening balance, inactive), categories (defaults + custom + managed "Debt interest")
+- [x] Transactions: income, expense, transfer (one row, never income/spending), debt payment (principal + interest, must reconcile)
+- [x] Filters, search, sort, date range, pagination, CSV export (formula-injection safe)
+- [x] Budgets per category/month/currency with approaching (>=80%) and exceeded states
+- [x] Reports: month summary, category breakdown, 6-month trend, year table, comparison vs previous month and same month last year
+- [x] Debts: principal tracker, additional borrowing, payment history, auto paid-off/reopen, overpayment blocked, due-day bills on dashboard
+- [x] Repayment planner (avalanche vs snowball), labelled as estimates
+- [x] Savings goals: current amount derived from contributions; optional linked transfer; monthly estimate; achieved/overdue/no-date states
+- [x] Locking: accounts by pk then debts; real parallel-connection tests (mutation-checked: the debt-lock test fails without the lock)
+- [x] FK relations use RESTRICT so in-use accounts/debts can't be deleted but account deletion still cascades
+- [x] Dashboard finance section; data export and account deletion cover finance
+- [ ] CSV IMPORT with review step – NOT implemented (planned; export only)
+- [ ] Link from a savings goal to a future plan – added in Phase 4 (future_plans app does not exist yet)
+- [ ] Interest accrual / amortisation schedules – NOT modelled (principal tracker only)
+- [ ] Multi-currency conversion – deliberately not done; reports are per currency
+- [ ] Recurring transactions, bank connections – out of scope (Phase 6)
 ## Phase 4 – future plans, interests  [todo]
 ## Phase 5 – reviews, insights, polish  [todo]
 ## Phase 6 – advanced  [todo]

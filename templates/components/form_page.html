@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="card-surface mx-auto max-w-2xl p-6">
+  {% if extra %}<p class="mb-4 text-sm text-base-content/70">{{ extra }}</p>{% endif %}
   <form method="post" class="space-y-4" novalidate>
     {% csrf_token %}
     {% if next_param %}<input type="hidden" name="next" value="{{ next_param }}">{% endif %}

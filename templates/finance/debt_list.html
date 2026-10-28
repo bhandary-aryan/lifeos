@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load money %}
+{% block content %}
+{% include "finance/_subnav.html" %}
+<div class="space-y-4">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="text-sm">{% for cur, total in totals.items %}<span class="mr-4">Outstanding principal ({{ cur }}): <strong>{{ total|money:cur }}</strong></span>{% endfor %}</div>
+    <div class="flex gap-2"><a href="{% url 'finance:debt_planner' %}" class="btn btn-sm btn-outline">Repayment planner</a><a href="{% url 'finance:debt_create' %}" class="btn btn-sm btn-primary"><i data-lucide="plus" class="h-4 w-4"></i> New debt</a></div></div>
+  {% if debts %}
+  <div class="grid gap-4 sm:grid-cols-2">
+    {% for d in debts %}
+    <a href="{% url 'finance:debt_detail' d.pk %}" class="card-surface block p-5 hover:shadow-md">
+      <div class="flex items-start justify-between gap-2"><h3 class="font-semibold">{{ d.creditor }}</h3><span class="badge badge-sm {% if d.status == 'paid_off' %}badge-success{% elif d.status == 'closed' %}badge-ghost{% else %}badge-outline{% endif %}">{{ d.get_status_display }}</span></div>
+      <p class="mt-1 text-xs text-base-content/60">{{ d.interest_rate }}% annual{% if d.minimum_payment %} · minimum {{ d.minimum_payment|money:d.currency }}{% endif %}{% if d.due_day %} · due day {{ d.due_day }}{% endif %}</p>
+      <p class="mt-3 text-2xl font-semibold tabular-nums">{{ d.outstanding|money:d.currency }}</p><p class="text-xs text-base-content/60">outstanding of {{ d.original_amount|money:d.currency }} borrowed</p>
+      <div class="mt-3">{% include "components/progress.html" with value=d.paid_pct label="Repaid" %}</div>
+    </a>{% endfor %}
+  </div>
+  {% else %}
+  <div class="card-surface p-10 text-center"><h2 class="text-lg font-semibold">No debts recorded</h2><p class="mt-1 text-sm text-base-content/60">Track loans, credit card balances and other liabilities, with principal and interest recorded separately.</p><a href="{% url 'finance:debt_create' %}" class="btn btn-primary btn-sm mt-4">Add a debt</a></div>
+  {% endif %}
+</div>
+{% endblock %}

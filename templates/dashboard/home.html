@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load money %}
 {% block content %}
 <div class="space-y-6">
   <section>
@@ -67,6 +68,27 @@
     </ul>
     {% else %}<p class="py-6 text-sm text-base-content/60">No active goals. <a class="link link-primary" href="{% url 'goals:create' %}">Create one</a>.</p>{% endif %}
   </section>
+
+  {% if summary.finance.has_accounts %}
+  {% with f=summary.finance %}
+  <section class="card-surface p-5" aria-label="Finances this month">
+    <div class="flex items-center justify-between"><h3 class="text-base font-semibold">Finances this month <span class="text-xs font-normal text-base-content/50">({{ f.currency }})</span></h3><a href="{% url 'finance:overview' %}" class="link link-hover text-xs">Open finances</a></div>
+    <dl class="mt-3 grid grid-cols-2 gap-4 lg:grid-cols-5">
+      <div><dt class="text-xs text-base-content/60">Income</dt><dd class="text-lg font-semibold tabular-nums text-success">{{ f.summary.income|money:f.currency }}</dd></div>
+      <div><dt class="text-xs text-base-content/60">Spending</dt><dd class="text-lg font-semibold tabular-nums">{{ f.summary.spending|money:f.currency }}</dd></div>
+      <div><dt class="text-xs text-base-content/60">Debt repaid</dt><dd class="text-lg font-semibold tabular-nums">{{ f.summary.debt_paid|money:f.currency }}</dd></div>
+      <div><dt class="text-xs text-base-content/60">Net cash flow</dt><dd class="text-lg font-semibold tabular-nums {% if f.summary.net_cash_flow < 0 %}text-error{% else %}text-success{% endif %}">{{ f.summary.net_cash_flow|money:f.currency }}</dd></div>
+      <div><dt class="text-xs text-base-content/60">Outstanding debt</dt><dd class="text-lg font-semibold tabular-nums">{{ f.debt_outstanding|money:f.currency }}</dd></div></dl>
+    <div class="mt-5 grid gap-6 lg:grid-cols-3">
+      <div><h4 class="text-sm font-semibold">Budgets</h4>{% if f.budgets %}<ul class="mt-2 space-y-2">{% for b in f.budgets %}<li><div class="flex justify-between text-xs"><span>{{ b.budget.category.name }}</span><span class="tabular-nums">{{ b.pct }}%</span></div><progress class="progress {% if b.state == 'over' %}progress-error{% elif b.state == 'warning' %}progress-warning{% else %}progress-primary{% endif %} h-2 w-full" value="{{ b.pct }}" max="100" aria-label="{{ b.budget.category.name }} budget used"></progress></li>{% endfor %}</ul>{% else %}<p class="mt-2 text-sm text-base-content/60">No budgets this month.</p>{% endif %}</div>
+      <div><h4 class="text-sm font-semibold">Savings goals</h4>{% if f.goals %}<ul class="mt-2 space-y-2">{% for g in f.goals %}<li><div class="flex justify-between text-xs"><a class="hover:underline" href="{% url 'finance:savings_detail' g.pk %}">{{ g.name }}</a><span class="tabular-nums">{{ g.pct }}%</span></div>{% include "components/progress.html" with value=g.pct label=g.name %}</li>{% endfor %}</ul>{% else %}<p class="mt-2 text-sm text-base-content/60">No active savings goals.</p>{% endif %}</div>
+      <div><h4 class="text-sm font-semibold">Upcoming payments</h4>{% if f.bills %}<ul class="mt-2 space-y-1 text-sm">{% for b in f.bills %}<li class="flex justify-between gap-2"><a class="truncate hover:underline" href="{% url 'finance:debt_detail' b.debt.pk %}">{{ b.debt.creditor }}</a><span class="text-xs tabular-nums">{{ b.amount|money:b.debt.currency }} · {% if b.days == 0 %}today{% else %}{{ b.due|date:"j M" }}{% endif %}</span></li>{% endfor %}</ul>{% else %}<p class="mt-2 text-sm text-base-content/60">None due in the next 14 days.</p>{% endif %}</div>
+    </div>
+  </section>
+  {% endwith %}
+  {% else %}
+  <a href="{% url 'finance:overview' %}" class="card-surface block p-5 hover:shadow-md"><div class="flex items-center justify-between"><span class="text-sm font-medium text-base-content/70">Finances</span><i data-lucide="wallet" class="h-5 w-5 text-primary"></i></div><p class="mt-2 text-sm text-base-content/60">Add an account to start tracking income, spending, budgets, debts and savings.</p></a>
+  {% endif %}
 
   <section aria-label="Coming soon" class="grid gap-4 sm:grid-cols-2">
     {% for card in summary.cards %}

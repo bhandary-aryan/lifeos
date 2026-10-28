@@ -1,0 +1,10 @@
+<div role="tablist" class="tabs tabs-boxed mb-5 flex-wrap bg-base-100 border border-base-300">
+  <a role="tab" class="tab {% if tab == 'overview' %}tab-active{% endif %}" href="{% url 'finance:overview' %}">Overview</a>
+  <a role="tab" class="tab {% if tab == 'transactions' %}tab-active{% endif %}" href="{% url 'finance:transactions' %}">Transactions</a>
+  <a role="tab" class="tab {% if tab == 'accounts' %}tab-active{% endif %}" href="{% url 'finance:accounts' %}">Accounts</a>
+  <a role="tab" class="tab {% if tab == 'budgets' %}tab-active{% endif %}" href="{% url 'finance:budgets' %}">Budgets</a>
+  <a role="tab" class="tab {% if tab == 'debts' %}tab-active{% endif %}" href="{% url 'finance:debts' %}">Debts</a>
+  <a role="tab" class="tab {% if tab == 'savings' %}tab-active{% endif %}" href="{% url 'finance:savings' %}">Savings</a>
+  <a role="tab" class="tab {% if tab == 'reports' %}tab-active{% endif %}" href="{% url 'finance:reports' %}">Reports</a>
+  <a role="tab" class="tab {% if tab == 'categories' %}tab-active{% endif %}" href="{% url 'finance:categories' %}">Categories</a>
+</div>

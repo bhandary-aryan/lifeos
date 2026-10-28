@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load money %}
+{% block content %}
+{% include "finance/_subnav.html" %}
+<div class="space-y-4">
+  <div class="flex justify-end"><a href="{% url 'finance:account_create' %}" class="btn btn-primary btn-sm"><i data-lucide="plus" class="h-4 w-4"></i> New account</a></div>
+  {% if accounts %}
+  <div class="card-surface divide-y divide-base-300">
+    {% for a in accounts %}
+    <div class="flex flex-wrap items-center gap-3 px-5 py-4">
+      <div class="min-w-0 flex-1"><p class="font-medium">{{ a.name }} {% if not a.is_active %}<span class="badge badge-ghost badge-sm">Inactive</span>{% endif %}</p>
+        <p class="text-xs text-base-content/60">{{ a.get_account_type_display }} · {{ a.currency }} · opening {{ a.opening_balance|money:a.currency }}</p></div>
+      <p class="text-lg font-semibold tabular-nums {% if a.balance < 0 %}text-error{% endif %}">{{ a.balance|money:a.currency }}</p>
+      <a class="btn btn-ghost btn-xs" href="{% url 'finance:transactions' %}?account={{ a.pk }}">Transactions</a>
+      <a class="btn btn-ghost btn-xs" href="{% url 'finance:account_update' a.pk %}" aria-label="Edit {{ a.name }}"><i data-lucide="pencil" class="h-3.5 w-3.5"></i></a>
+      <a class="btn btn-ghost btn-xs text-error" href="{% url 'finance:account_delete' a.pk %}" aria-label="Delete {{ a.name }}"><i data-lucide="trash-2" class="h-3.5 w-3.5"></i></a>
+    </div>{% endfor %}
+  </div>
+  <p class="text-xs text-base-content/50">Balances are calculated from the opening balance and all transactions, so they can never drift out of step.</p>
+  {% else %}
+  <div class="card-surface p-10 text-center"><h2 class="text-lg font-semibold">No accounts yet</h2><p class="mt-1 text-sm text-base-content/60">Add a current account, savings account, cash or credit card to start recording money.</p><a href="{% url 'finance:account_create' %}" class="btn btn-primary btn-sm mt-4">Add an account</a></div>
+  {% endif %}
+</div>
+{% endblock %}
