@@ -13,7 +13,7 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.models import CURRENCY_CHOICES
 from apps.core.services import local_today, parse_date
-from apps.core.views import safe_next
+from apps.core.views import confirm_and_delete, safe_next
 
 from . import services as fin
 from .calculations import month_bounds, shift_month, simulate_repayment
@@ -45,18 +45,7 @@ def _form_page(request, form, title, cancel_url, extra=None):
     return render(request, "components/form_page.html", {"form": form, "page_title": title, "cancel_url": cancel_url, "extra": extra})
 
 
-def _confirm(request, obj, noun, cancel_url, success_url, deleter, message, extra=""):
-    if request.method == "POST":
-        try:
-            deleter(obj)
-        except (ProtectedError, RestrictedError, ValidationError) as exc:
-            msg = " ".join(exc.messages) if isinstance(exc, ValidationError) else (
-                f"This {noun} is still used by other records and can't be deleted. Remove or reassign them first.")
-            messages.error(request, msg)
-            return redirect(cancel_url)
-        messages.success(request, message)
-        return redirect(safe_next(request, success_url))
-    return render(request, "components/confirm_delete.html", {"object": obj, "noun": noun, "page_title": f"Delete {noun}", "cancel_url": cancel_url, "extra": extra})
+_confirm = confirm_and_delete
 
 
 def _month_param(request, today):
@@ -426,8 +415,9 @@ def savings_detail(request, pk):
 def savings_delete(request, pk):
     goal = _owned(SavingsGoal, request, pk)
     linked = goal.contributions.filter(transfer__isnull=False).count()
+    plan_note = " The future plan linked to it is kept, just unlinked." if hasattr(goal, "future_plan") else ""
     extra = (f"{linked} linked account transfer{'s' if linked != 1 else ''} will also be removed, which changes the balances of the accounts involved." if linked
-             else "Its contribution records will be removed. No account balances change.")
+             else "Its contribution records will be removed. No account balances change.") + plan_note
     return _confirm(request, goal, "savings goal", reverse("finance:savings_detail", args=[goal.pk]), reverse("finance:savings"), fin.delete_savings_goal, "Savings goal deleted.", extra)
 
 

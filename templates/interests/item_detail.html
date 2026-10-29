@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load money %}
+{% block content %}
+<div class="mx-auto max-w-3xl space-y-6">
+  <section class="card-surface overflow-hidden">
+    {% if item.image %}<img src="{% url 'interests:image' item.pk %}" alt="{{ item.name }}" class="max-h-80 w-full object-cover">{% endif %}
+    <div class="p-6">
+      <div class="flex flex-wrap items-start justify-between gap-3"><div><p class="text-xs text-base-content/60"><a class="link link-hover" href="{% url 'interests:list' %}">Hobbies &amp; Bucket List</a> · {{ item.get_category_display }}</p>
+        <h2 class="mt-1 text-xl font-semibold">{{ item.name }}</h2>
+        <div class="mt-2 flex flex-wrap gap-2 text-xs"><span class="badge badge-outline">{{ item.get_status_display }}</span>{% if item.is_bucket_list %}<span class="badge badge-accent badge-outline">Bucket list</span>{% endif %}{% if item.completed_on %}<span class="badge badge-success badge-outline">Done {{ item.completed_on|date:"j M Y" }}</span>{% endif %}</div></div>
+        <div class="flex gap-2"><a class="btn btn-outline btn-sm" href="{% url 'interests:update' item.pk %}">Edit</a><a class="btn btn-ghost btn-sm text-error" href="{% url 'interests:delete' item.pk %}">Delete</a></div></div>
+      {% if item.tags %}<p class="mt-3 text-sm text-base-content/60">{% for t in item.tags %}<a class="link link-hover" href="{% url 'interests:list' %}?tag={{ t|urlencode }}">#{{ t }}</a> {% endfor %}</p>{% endif %}
+      {% if item.description %}<p class="mt-4 whitespace-pre-line text-sm">{{ item.description }}</p>{% endif %}
+      {% if item.notes %}<h3 class="mt-5 text-sm font-semibold">Notes</h3><p class="mt-1 whitespace-pre-line text-sm text-base-content/80">{{ item.notes }}</p>{% endif %}
+      {% if item.is_bucket_list %}
+      <dl class="mt-5 grid gap-3 sm:grid-cols-3">
+        <div><dt class="text-xs text-base-content/60">Aiming for</dt><dd class="text-sm font-medium">{% if item.target_date %}{{ item.target_date|date:"j M Y" }}{% else %}Someday{% endif %}</dd></div>
+        <div><dt class="text-xs text-base-content/60">Estimated cost</dt><dd class="text-sm font-medium">{% if item.estimated_cost is not None %}{{ item.estimated_cost|money:item.currency }}{% else %}—{% endif %}</dd></div>
+        <div><dt class="text-xs text-base-content/60">Future plan</dt><dd class="text-sm font-medium">{% if item.linked_plan %}<a class="link link-primary" href="{% url 'future_plans:detail' item.linked_plan.pk %}">{{ item.linked_plan.title }}</a>{% else %}—{% endif %}</dd></div></dl>
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        {% if item.linked_task %}<span class="text-sm">In your planner: <a class="link link-primary" href="{% url 'planner:task_update' item.linked_task.pk %}">{{ item.linked_task.title }}</a></span>
+        {% else %}<form method="post" action="{% url 'interests:to_task' item.pk %}">{% csrf_token %}<button class="btn btn-outline btn-sm">Add to my planner</button></form><span class="text-xs text-base-content/50">Optional — nothing is scheduled unless you ask.</span>{% endif %}</div>
+      {% endif %}
+      <form method="post" action="{% url 'interests:status' item.pk %}" class="mt-5 flex flex-wrap items-center gap-2">{% csrf_token %}<span class="text-sm text-base-content/60">Mark as:</span>
+        {% if item.status != 'done' %}<button name="status" value="done" class="btn btn-sm btn-success btn-outline">Done / tried</button>{% endif %}
+        {% if item.status != 'enjoy' %}<button name="status" value="enjoy" class="btn btn-sm btn-outline">I enjoy this</button>{% endif %}
+        {% if item.status != 'want' %}<button name="status" value="want" class="btn btn-sm btn-outline">Want to try</button>{% endif %}
+        {% if item.status != 'not_for_me' %}<button name="status" value="not_for_me" class="btn btn-sm btn-ghost">Not for me</button>{% endif %}</form>
+    </div>
+  </section>
+</div>
+{% endblock %}

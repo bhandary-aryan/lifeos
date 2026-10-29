@@ -149,3 +149,53 @@ def test_unknown_strategy_rejected():
 def test_simulation_totals_reconcile():
     r = simulate_repayment(debts(), "150", "avalanche")
     assert r["total_paid"] == D("1300.00") + r["total_interest"]       # principal + interest, nothing lost or invented
+
+
+# ---------- add_months / affordability ----------
+from apps.finance.calculations import add_months, affordability  # noqa: E402
+
+
+@pytest.mark.parametrize("start,n,expected", [
+    (d(2026, 1, 31), 1, d(2026, 2, 28)), (d(2028, 1, 31), 1, d(2028, 2, 29)), (d(2026, 12, 15), 1, d(2027, 1, 15)),
+    (d(2026, 3, 31), -1, d(2026, 2, 28)), (d(2026, 5, 10), 0, d(2026, 5, 10)), (d(2026, 1, 15), 25, d(2028, 2, 15)),
+])
+def test_add_months_clamps_day(start, n, expected):
+    assert add_months(start, n) == expected
+
+
+def aff(cost="12000", saved="2000", avail="500", target=d(2027, 1, 15), today=d(2026, 1, 15)):
+    return affordability(cost, saved, avail, target, today)
+
+
+def test_affordability_on_track_when_available_covers_required():
+    r = aff()                                     # remaining 10000 over 12 months = 833.34/mo needed
+    assert r["required_monthly"] == D("833.34") and r["state"] == "shortfall" and r["shortfall_monthly"] == D("333.34")
+    ok = aff(avail="900")
+    assert ok["state"] == "on_track" and ok["shortfall_monthly"] is None
+
+
+def test_affordability_projects_completion_date_at_available_rate():
+    r = aff(avail="500")
+    assert r["months_at_available"] == 20 and r["projected_date"] == d(2027, 9, 15)       # ceil(10000/500)=20 months
+
+
+def test_affordability_projection_rounds_up():
+    assert aff(cost="1001", saved="0", avail="500")["months_at_available"] == 3
+
+
+def test_affordability_achieved_and_no_capacity_and_overdue():
+    assert aff(saved="12000")["state"] == "achieved" and aff(saved="99999")["remaining"] == D("0.00")
+    nc = aff(avail="0")
+    assert nc["state"] == "no_capacity" and nc["projected_date"] is None and nc["months_at_available"] is None
+    assert aff(avail="-50")["state"] == "no_capacity"
+    late = aff(target=d(2025, 12, 1))
+    assert late["state"] == "overdue_shortfall" and late["required_monthly"] is None
+
+
+def test_affordability_without_deadline_only_projects():
+    r = aff(target=None, avail="1000")
+    assert r["state"] == "on_track" and r["required_monthly"] is None and r["months_at_available"] == 10
+
+
+def test_affordability_never_says_affordable_without_inputs():
+    assert aff(avail=None)["state"] == "no_capacity" and aff(avail="")["state"] == "no_capacity"

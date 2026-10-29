@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load money %}
+{% block content %}
+<div class="space-y-5">
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <form method="get" class="flex flex-1 flex-wrap items-end gap-2" role="search">
+      <input type="search" name="q" value="{{ f.q }}" placeholder="Search…" class="input input-bordered input-sm w-44" aria-label="Search">
+      <select name="category" class="select select-bordered select-sm" aria-label="Category"><option value="">All kinds</option>{% for v,l in categories %}<option value="{{ v }}" {% if f.category == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+      <select name="status" class="select select-bordered select-sm" aria-label="Status"><option value="">Any status</option>{% for v,l in statuses %}<option value="{{ v }}" {% if f.status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+      <label class="flex items-center gap-1 text-sm"><input type="checkbox" name="bucket" value="1" class="checkbox checkbox-sm" {% if f.bucket == "1" %}checked{% endif %}> Bucket list only</label>
+      <select name="sort" class="select select-bordered select-sm" aria-label="Sort"><option value="name">Sort: name</option><option value="recent" {% if f.sort == "recent" %}selected{% endif %}>Newest</option><option value="priority" {% if f.sort == "priority" %}selected{% endif %}>Priority</option><option value="target" {% if f.sort == "target" %}selected{% endif %}>Target date</option></select>
+      <button class="btn btn-sm btn-outline" type="submit">Apply</button>{% if qs %}<a href="{% url 'interests:list' %}" class="btn btn-sm btn-ghost">Clear</a>{% endif %}
+    </form>
+    <div class="flex gap-2"><a href="{% url 'interests:create' %}?bucket=1" class="btn btn-sm btn-outline">Add to bucket list</a><a href="{% url 'interests:create' %}" class="btn btn-sm btn-primary"><i data-lucide="plus" class="h-4 w-4"></i> Add</a></div>
+  </div>
+  {% if tags %}<div class="flex flex-wrap gap-2" aria-label="Tags">{% for t, n in tags %}<a href="?tag={{ t|urlencode }}" class="badge {% if f.tag == t %}badge-primary{% else %}badge-outline{% endif %}">{{ t }} <span class="ml-1 opacity-60">{{ n }}</span></a>{% endfor %}</div>{% endif %}
+
+  {% if page_obj.object_list %}
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {% for i in page_obj.object_list %}
+    <a href="{% url 'interests:detail' i.pk %}" class="card-surface block overflow-hidden hover:shadow-md">
+      {% if i.image %}<img src="{% url 'interests:image' i.pk %}" alt="" class="h-36 w-full object-cover" loading="lazy">{% endif %}
+      <div class="p-4"><div class="flex items-start justify-between gap-2"><h3 class="font-semibold leading-snug">{{ i.name }}</h3>{% if i.is_bucket_list %}<span class="badge badge-accent badge-outline badge-sm">Bucket list</span>{% endif %}</div>
+        <p class="mt-1 text-xs text-base-content/60">{{ i.get_category_display }} · {{ i.get_status_display }}</p>
+        {% if i.tags %}<p class="mt-2 text-xs text-base-content/50">{% for t in i.tags %}#{{ t }} {% endfor %}</p>{% endif %}
+        {% if i.is_bucket_list and i.target_date %}<p class="mt-2 text-xs">Aiming for {{ i.target_date|date:"M Y" }}{% if i.estimated_cost is not None %} · about {{ i.estimated_cost|money:i.currency }}{% endif %}</p>{% endif %}</div>
+    </a>{% endfor %}
+  </div>
+  {% include "components/pager.html" %}
+  {% else %}
+  <div class="card-surface p-10 text-center"><span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary"><i data-lucide="sparkles" class="h-7 w-7"></i></span>
+    <h2 class="mt-4 text-lg font-semibold">{% if qs %}Nothing matches those filters{% elif has_any %}Nothing here{% else %}A place for the things you enjoy{% endif %}</h2>
+    <p class="mx-auto mt-1 max-w-md text-sm text-base-content/60">{% if qs %}Try clearing a filter.{% else %}Hobbies, books, films, places, weekend ideas and a bucket list. No targets, no streaks — it's just yours.{% endif %}</p>
+    {% if not qs %}<a href="{% url 'interests:create' %}" class="btn btn-primary btn-sm mt-4">Add your first one</a>{% endif %}</div>
+  {% endif %}
+</div>
+{% endblock %}

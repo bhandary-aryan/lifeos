@@ -1,6 +1,8 @@
 from django.contrib import messages
+from django.core.exceptions import ValidationError
+from django.db.models import ProtectedError, RestrictedError
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import CreateView, DeleteView, TemplateView, UpdateView
 
@@ -90,3 +92,18 @@ class OwnedDeleteView(OwnerQuerysetMixin, DeleteView):
 
     def get_success_url(self):
         return safe_next(self.request, str(self.success_url))
+
+
+def confirm_and_delete(request, obj, noun, cancel_url, success_url, deleter, message, extra=""):
+    """GET shows a confirmation page; POST deletes via `deleter`. In-use records report a clear message, never a crash."""
+    if request.method == "POST":
+        try:
+            deleter(obj)
+        except (ProtectedError, RestrictedError, ValidationError) as exc:
+            msg = " ".join(exc.messages) if isinstance(exc, ValidationError) else (
+                f"This {noun} is still used by other records and can't be deleted. Remove or reassign them first.")
+            messages.error(request, msg)
+            return redirect(cancel_url)
+        messages.success(request, message)
+        return redirect(safe_next(request, success_url))
+    return render(request, "components/confirm_delete.html", {"object": obj, "noun": noun, "page_title": f"Delete {noun}", "cancel_url": cancel_url, "extra": extra})

@@ -7,11 +7,11 @@ still show honest "coming" cards instead of invented numbers.
 import datetime as dt
 from collections import defaultdict
 
-from django.urls import reverse
-
 from apps.accounts.models import LIFE_AREA_CHOICES
 from apps.core.services import PRIORITY_RANK, local_now
 from apps.finance.services import dashboard_finance
+from apps.future_plans.services import approaching_plans
+from apps.interests.services import dashboard_block as interests_block
 from apps.goals.models import Goal
 from apps.goals.services import annotate_progress, attach_progress
 from apps.planner import habit_services as hs
@@ -29,11 +29,6 @@ def greeting_for(hour: int) -> str:
     if hour < 18:
         return "Good afternoon"
     return "Good evening"
-
-
-COMING_CARDS = [
-    ("Future plans", "core:future_plans", "compass", "Future plans are coming in Phase 4.", "Phase 4"),
-]
 
 
 def _habit_rows(user, today, week_start):
@@ -93,8 +88,6 @@ def build_dashboard_summary(user):
         "habits": habit_rows,
         "habits_done": sum(1 for r in habit_rows if r["done_today"]),
         "has_any_data": bool(priorities or overdue or due_soon or goals or habit_rows),
-        "cards": [
-            {"label": label, "url": reverse(url), "icon": icon, "empty": empty, "phase": phase}
-            for label, url, icon, empty, phase in COMING_CARDS
-        ],
+        "plans": approaching_plans(user, today),
+        "interests": interests_block(user, today),
     }

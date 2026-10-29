@@ -22,7 +22,7 @@ User = get_user_model()
 def test_dashboard_empty_state_shows_no_fabricated_numbers(auth_client):
     html = auth_client.get(reverse("dashboard:home")).content.decode()
     assert "Nothing on it is sample data" in html
-    assert "coming in phase 4" in html.lower()
+    assert "coming in phase" not in html.lower()          # no placeholder cards remain on the dashboard
     assert "£" not in html and "$" not in html
 
 
@@ -55,13 +55,13 @@ def test_greeting_boundaries(hour, expected):
 
 def test_dashboard_cards_link_to_modules(auth_client):
     html = auth_client.get(reverse("dashboard:home")).content.decode()
-    for name in ("goals:list", "planner:habits", "finance:overview", "core:future_plans"):
+    for name in ("goals:list", "planner:habits", "finance:overview", "future_plans:list"):
         assert f'href="{reverse(name)}"' in html
 
 
 # ---------- navigation ----------
 NAV = ["dashboard:home", "goals:list", "planner:today", "planner:habits", "finance:overview",
-       "core:future_plans", "core:interests", "core:reviews", "accounts:settings"]
+       "future_plans:list", "interests:list", "core:reviews", "accounts:settings"]
 
 
 def test_all_nine_nav_destinations_load_and_are_listed(auth_client):

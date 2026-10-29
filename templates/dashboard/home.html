@@ -90,13 +90,19 @@
   <a href="{% url 'finance:overview' %}" class="card-surface block p-5 hover:shadow-md"><div class="flex items-center justify-between"><span class="text-sm font-medium text-base-content/70">Finances</span><i data-lucide="wallet" class="h-5 w-5 text-primary"></i></div><p class="mt-2 text-sm text-base-content/60">Add an account to start tracking income, spending, budgets, debts and savings.</p></a>
   {% endif %}
 
-  <section aria-label="Coming soon" class="grid gap-4 sm:grid-cols-2">
-    {% for card in summary.cards %}
-    <a href="{{ card.url }}" class="card-surface group p-5 transition-shadow hover:shadow-md">
-      <div class="flex items-center justify-between"><span class="text-sm font-medium text-base-content/70">{{ card.label }}</span><i data-lucide="{{ card.icon }}" class="h-5 w-5 text-primary" aria-hidden="true"></i></div>
-      <p class="mt-3 text-sm text-base-content/60">{{ card.empty }}</p><span class="badge badge-ghost badge-sm mt-3">{{ card.phase }}</span>
-    </a>{% endfor %}
-  </section>
+  {% if summary.plans %}
+  <section class="card-surface p-5" aria-label="Future plans approaching"><div class="flex items-center justify-between"><h3 class="text-base font-semibold">Plans coming up</h3><a href="{% url 'future_plans:list' %}" class="link link-hover text-xs">All plans</a></div>
+    <ul class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{% for p in summary.plans %}<li><a href="{% url 'future_plans:detail' p.pk %}" class="block rounded-box border border-base-300 p-4 hover:bg-base-200"><p class="truncate text-sm font-medium">{{ p.title }}</p>
+      {% if p.info.saving_pct is not None %}<div class="mt-2">{% include "components/progress.html" with value=p.info.saving_pct label=p.title %}</div>{% endif %}
+      <p class="mt-2 text-xs {% if p.info.needs_update %}font-medium text-error{% else %}text-base-content/60{% endif %}">{% if p.info.needs_update %}Target date passed — update this plan{% else %}Target {{ p.target_date|date:"j M Y" }}{% endif %}</p></a></li>{% endfor %}</ul></section>
+  {% endif %}
+
+  {% if summary.interests.has_any %}
+  <section class="card-surface p-5" aria-label="Something to look forward to"><div class="flex items-center justify-between"><h3 class="text-base font-semibold">Something to look forward to</h3><a href="{% url 'interests:list' %}" class="link link-hover text-xs">Hobbies &amp; bucket list</a></div>
+    {% if summary.interests.soon %}<ul class="mt-2 space-y-1 text-sm">{% for i in summary.interests.soon %}<li><a class="link link-hover" href="{% url 'interests:detail' i.pk %}">{{ i.name }}</a> <span class="text-xs text-base-content/50">{{ i.target_date|date:"j M" }}</span></li>{% endfor %}</ul>{% endif %}
+    {% if summary.interests.idea %}<p class="mt-2 text-sm text-base-content/70">Idea for today: <a class="link link-primary" href="{% url 'interests:detail' summary.interests.idea.0 %}">{{ summary.interests.idea.1 }}</a></p>{% endif %}
+    {% if not summary.interests.soon and not summary.interests.idea %}<p class="mt-2 text-sm text-base-content/60">{{ summary.interests.bucket_open_count }} thing{{ summary.interests.bucket_open_count|pluralize }} on your bucket list.</p>{% endif %}</section>
+  {% endif %}
 
   {% if summary.life_area_labels %}<p class="text-xs text-base-content/60">Your focus areas: {{ summary.life_area_labels|join:", " }}</p>{% endif %}
 </div>

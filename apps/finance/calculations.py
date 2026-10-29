@@ -3,6 +3,7 @@
 Everything here is an ESTIMATE helper: no investment returns, no inflation,
 no changing interest rates. Results must be labelled as estimates in the UI.
 """
+import calendar
 import datetime as dt
 from decimal import ROUND_CEILING, ROUND_HALF_UP, Decimal
 
@@ -131,3 +132,44 @@ def simulate_repayment(debts, monthly_budget, strategy, max_months=600):
     result["total_interest"] = q2(result["total_interest"])
     result["total_paid"] = q2(result["total_paid"])
     return result
+
+
+def add_months(day: dt.date, months: int) -> dt.date:
+    """`day` shifted by whole months; the day is clamped to the target month's length."""
+    y, m = shift_month(day.year, day.month, months)
+    return dt.date(y, m, min(day.day, calendar.monthrange(y, m)[1]))
+
+
+def affordability(cost, saved, monthly_available, target_date, today):
+    """Deterministic 'can I reach this by then?' estimate. Never a promise.
+
+    Assumes no returns, inflation or price changes, and a constant monthly saving.
+    state: achieved | no_capacity | on_track | shortfall | overdue_shortfall
+    """
+    cost, saved, avail = Decimal(cost), Decimal(saved or 0), Decimal(monthly_available or 0)
+    remaining = max(cost - saved, ZERO)
+    out = {"remaining": q2(remaining), "required_monthly": None, "months_to_target": None, "months_at_available": None,
+           "projected_date": None, "shortfall_monthly": None, "state": "on_track"}
+    if remaining <= 0:
+        out.update(state="achieved", required_monthly=ZERO, shortfall_monthly=ZERO)
+        return out
+    if avail > 0:
+        n = int((remaining / avail).to_integral_value(rounding=ROUND_CEILING))
+        out["months_at_available"] = n
+        out["projected_date"] = add_months(today, n)
+    plan = contribution_plan(cost, saved, target_date, today) if target_date else None
+    if plan:
+        out["months_to_target"] = plan["months"]
+        out["required_monthly"] = plan["monthly"]
+    if avail <= 0:
+        out["state"] = "no_capacity"
+    elif plan is None:
+        out["state"] = "on_track"            # no deadline: only the projected date is meaningful
+    elif plan["state"] == "overdue":
+        out["state"] = "overdue_shortfall"
+    elif avail >= plan["monthly"]:
+        out["state"] = "on_track"
+    else:
+        out["state"] = "shortfall"
+        out["shortfall_monthly"] = q2(plan["monthly"] - avail)
+    return out

@@ -15,6 +15,9 @@ def export_user_data(user):
     from apps.finance.models import (
         Account, Budget, Category, Debt, DebtDrawdown, SavingsContribution, SavingsGoal, Transaction)
 
+    from apps.future_plans.models import FuturePlan, PlanAction
+    from apps.interests.models import InterestItem
+
     p = user.profile
     iso = lambda v: v.isoformat() if v else None  # noqa: E731
     return {
@@ -94,6 +97,17 @@ def export_user_data(user):
             "savings_contributions": [{"goal_id": c.goal_id, "date": iso(c.date), "amount": str(c.amount), "note": c.note,
                                        "transfer_id": c.transfer_id} for c in SavingsContribution.objects.filter(owner=user)],
         },
+        "future_plans": [{"id": f.pk, "title": f.title, "category": f.category, "description": f.description, "priority": f.priority,
+                          "status": f.status, "target_date": iso(f.target_date), "estimated_cost": str(f.estimated_cost) if f.estimated_cost is not None else None,
+                          "currency": f.currency, "goal_id": f.goal_id, "savings_goal_id": f.savings_goal_id, "achieved_on": iso(f.achieved_on)}
+                         for f in FuturePlan.objects.filter(owner=user)],
+        "plan_actions": [{"plan_id": a.plan_id, "title": a.title, "notes": a.notes, "due_date": iso(a.due_date), "is_done": a.is_done}
+                         for a in PlanAction.objects.filter(owner=user)],
+        "interests": [{"id": i.pk, "name": i.name, "category": i.category, "status": i.status, "priority": i.priority, "description": i.description,
+                       "notes": i.notes, "tags": i.tags, "has_image": bool(i.image), "is_bucket_list": i.is_bucket_list, "target_date": iso(i.target_date),
+                       "estimated_cost": str(i.estimated_cost) if i.estimated_cost is not None else None, "currency": i.currency,
+                       "linked_task_id": i.linked_task_id, "linked_plan_id": i.linked_plan_id, "completed_on": iso(i.completed_on)}
+                      for i in InterestItem.objects.filter(owner=user)],
         "habit_logs": [
             {"habit_id": l.habit_id, "date": iso(l.date), "note": l.note}
             for l in HabitLog.objects.filter(owner=user)

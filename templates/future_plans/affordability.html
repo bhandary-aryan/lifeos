@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load money %}
+{% block content %}
+<div class="mx-auto max-w-3xl space-y-6">
+  <section class="card-surface p-6"><h2 class="text-base font-semibold">Affordability check{% if plan %} <span class="text-sm font-normal text-base-content/60">for {{ plan.title }}</span>{% endif %}</h2>
+    <p class="mt-1 text-sm text-base-content/60">Enter your own assumptions. The result shows what they imply — it can't tell you whether something is truly affordable.</p>
+    <form method="get" class="mt-4 grid gap-4 sm:grid-cols-2" novalidate>
+      {% include "components/field.html" with field=form.cost %}{% include "components/field.html" with field=form.saved %}
+      <div>{% include "components/field.html" with field=form.monthly_available %}{% if suggestion is not None %}<p class="mt-1 text-xs text-base-content/50">Pre-filled from your average net cash flow over the last 3 full months ({{ suggestion|money:currency }}). Change it to what you really can set aside.</p>{% endif %}</div>
+      {% include "components/field.html" with field=form.target_date %}
+      <div class="sm:col-span-2"><button class="btn btn-primary btn-sm" type="submit">Calculate</button></div></form></section>
+  <div class="alert alert-info text-sm" role="note"><i data-lucide="info" class="h-5 w-5"></i><span><strong>Estimate only.</strong> Assumes a constant monthly saving with no interest, investment returns, inflation or price changes. Not financial advice.</span></div>
+  {% if result %}
+  <section class="card-surface p-6" aria-live="polite"><h3 class="text-base font-semibold">What these assumptions imply</h3>
+    {% if result.state == "achieved" %}<p class="mt-2">The amount you've entered as saved already covers the cost.</p>
+    {% else %}
+    <dl class="mt-3 grid gap-4 sm:grid-cols-2">
+      <div><dt class="text-xs text-base-content/60">Still to save</dt><dd class="text-xl font-semibold tabular-nums">{{ result.remaining|money:result.currency }}</dd></div>
+      {% if result.required_monthly is not None %}<div><dt class="text-xs text-base-content/60">Needed per month to hit the date ({{ result.months_to_target }} month{{ result.months_to_target|pluralize }})</dt><dd class="text-xl font-semibold tabular-nums">{{ result.required_monthly|money:result.currency }}</dd></div>{% endif %}
+      {% if result.months_at_available %}<div><dt class="text-xs text-base-content/60">At your monthly amount, you'd reach it in</dt><dd class="text-xl font-semibold">{{ result.months_at_available }} month{{ result.months_at_available|pluralize }} <span class="text-sm font-normal text-base-content/60">(around {{ result.projected_date|date:"M Y" }})</span></dd></div>{% endif %}
+    </dl>
+    <p class="mt-4 text-sm {% if result.state == 'shortfall' or result.state == 'overdue_shortfall' or result.state == 'no_capacity' %}text-warning{% endif %}" role="status">
+      {% if result.state == "no_capacity" %}With nothing set aside each month, these assumptions never reach the target.
+      {% elif result.state == "overdue_shortfall" %}The target date has already passed, so it can't be met. At your monthly amount the projected date is shown above.
+      {% elif result.state == "shortfall" %}Under these assumptions you'd be {{ result.shortfall_monthly|money:result.currency }} per month short of the amount needed by the target date.
+      {% elif result.required_monthly is not None %}Under these assumptions your monthly amount covers what's needed by the target date. Real life may differ.
+      {% else %}No target date given, so only the projected date is shown.{% endif %}</p>
+    {% endif %}
+  </section>{% endif %}
+</div>
+{% endblock %}

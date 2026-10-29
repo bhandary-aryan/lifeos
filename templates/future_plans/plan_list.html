@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load money %}
+{% block content %}
+<div class="space-y-5">
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <form method="get" class="flex flex-1 flex-wrap items-end gap-2" role="search">
+      <input type="search" name="q" value="{{ f.q }}" placeholder="Search plans…" class="input input-bordered input-sm w-48" aria-label="Search plans">
+      <select name="show" class="select select-bordered select-sm" aria-label="Show"><option value="open" {% if show == "open" %}selected{% endif %}>Open plans</option><option value="achieved" {% if show == "achieved" %}selected{% endif %}>Achieved</option><option value="all" {% if show == "all" %}selected{% endif %}>All</option></select>
+      <select name="category" class="select select-bordered select-sm" aria-label="Category"><option value="">All categories</option>{% for v,l in categories %}<option value="{{ v }}" {% if f.category == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+      <select name="priority" class="select select-bordered select-sm" aria-label="Priority"><option value="">Any priority</option>{% for v,l in priorities %}<option value="{{ v }}" {% if f.priority == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+      <select name="sort" class="select select-bordered select-sm" aria-label="Sort"><option value="target">Sort: target date</option><option value="priority" {% if f.sort == "priority" %}selected{% endif %}>Priority</option><option value="title" {% if f.sort == "title" %}selected{% endif %}>Title</option><option value="recent" {% if f.sort == "recent" %}selected{% endif %}>Recently updated</option></select>
+      <button class="btn btn-sm btn-outline" type="submit">Apply</button>{% if qs %}<a href="{% url 'future_plans:list' %}" class="btn btn-sm btn-ghost">Clear</a>{% endif %}
+    </form>
+    <div class="flex gap-2"><a href="{% url 'future_plans:affordability' %}" class="btn btn-sm btn-ghost">Affordability check</a><a href="{% url 'future_plans:create' %}" class="btn btn-sm btn-primary"><i data-lucide="plus" class="h-4 w-4"></i> New plan</a></div>
+  </div>
+  {% if page_obj.object_list %}
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {% for p in page_obj.object_list %}
+    <a href="{% url 'future_plans:detail' p.pk %}" class="card-surface block p-5 hover:shadow-md">
+      <div class="flex items-start justify-between gap-2"><h3 class="font-semibold leading-snug">{{ p.title }}</h3><span class="badge badge-sm {% if p.status == 'achieved' %}badge-success{% else %}badge-outline{% endif %}">{{ p.get_status_display }}</span></div>
+      <p class="mt-1 text-xs text-base-content/60">{{ p.get_category_display }} · {{ p.get_priority_display }} priority</p>
+      {% if p.estimated_cost %}<p class="mt-3 text-sm">Estimated cost <strong class="tabular-nums">{{ p.estimated_cost|money:p.currency }}</strong></p>{% endif %}
+      {% if p.info.saving_pct is not None %}<div class="mt-2">{% include "components/progress.html" with value=p.info.saving_pct label="Saved towards plan" %}</div>{% endif %}
+      <p class="mt-3 text-xs {% if p.info.needs_update %}font-medium text-error{% else %}text-base-content/60{% endif %}">
+        {% if p.info.needs_update %}Target date passed — update this plan{% elif p.target_date %}Target {{ p.target_date|date:"j M Y" }}{% else %}No target date{% endif %}</p>
+    </a>{% endfor %}
+  </div>
+  {% include "components/pager.html" %}
+  {% else %}
+  <div class="card-surface p-10 text-center"><span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary"><i data-lucide="compass" class="h-7 w-7"></i></span>
+    <h2 class="mt-4 text-lg font-semibold">{% if qs %}No plans match those filters{% else %}No plans yet{% endif %}</h2>
+    <p class="mx-auto mt-1 max-w-md text-sm text-base-content/60">{% if qs %}Try clearing a filter.{% else %}Big purchases and life milestones — a home, a wedding, a course, a trip. Add a cost and a date, link a savings goal, and see what it would take.{% endif %}</p>
+    {% if not qs %}<a href="{% url 'future_plans:create' %}" class="btn btn-primary btn-sm mt-4">Add your first plan</a>{% endif %}</div>
+  {% endif %}
+</div>
+{% endblock %}

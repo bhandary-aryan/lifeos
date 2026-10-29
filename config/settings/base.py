@@ -28,6 +28,8 @@ INSTALLED_APPS = [
     "apps.goals",
     "apps.planner",
     "apps.finance",
+    "apps.future_plans",
+    "apps.interests",
     "apps.dashboard",
 ]
 
@@ -91,6 +93,11 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Uploaded images live outside static files and are NEVER served publicly: they go through an
+# authenticated, owner-checked view. Point MEDIA_ROOT at persistent storage in production.
+MEDIA_ROOT = env("LIFEOS_MEDIA_ROOT", default=str(BASE_DIR / "media"))
+MAX_UPLOAD_BYTES = 3 * 1024 * 1024
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},

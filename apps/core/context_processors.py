@@ -7,8 +7,8 @@ NAV_ITEMS = [
     ("planner:today", "Planner", "calendar-check"),
     ("planner:habits", "Habits", "repeat"),
     ("finance:overview", "Finances", "wallet"),
-    ("core:future_plans", "Future Plans", "compass"),
-    ("core:interests", "Hobbies & Bucket List", "sparkles"),
+    ("future_plans:list", "Future Plans", "compass"),
+    ("interests:list", "Hobbies & Bucket List", "sparkles"),
     ("core:reviews", "Reviews & Insights", "line-chart"),
     ("accounts:settings", "Settings", "settings"),
 ]

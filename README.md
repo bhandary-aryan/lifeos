@@ -4,7 +4,7 @@ Personal life management platform: goals, planner, habits, finances, future plan
 Django monolith, PostgreSQL, server-rendered templates, Tailwind + DaisyUI, HTMX, Alpine.js, Chart.js, Lucide.
 The product name is configurable via `LIFEOS_SITE_NAME`.
 
-**Status:** Phases 1 (foundation), 2 (goals, planner, habits) and 3 (finance) complete. See `docs/CHECKLIST.md`. Future plans, interests and reviews show an honest "not built yet" page.
+**Status:** Phases 1 (foundation), 2 (goals, planner, habits), 3 (finance) and 4 (future plans, interests) complete. See `docs/CHECKLIST.md`. Reviews & Insights shows an honest "not built yet" page.
 
 ## Local setup
 ```bash
@@ -41,6 +41,8 @@ Tests run against real PostgreSQL (a throwaway `test_lifeos` database).
 - `apps/goals/` life areas, goals, milestones, progress services (`goals/services.py`)
 - `apps/planner/` tasks, habits, habit logs; capacity maths (`services.py`) and streak/consistency maths (`habit_services.py`)
 - `apps/finance/` accounts, categories, transactions, budgets, debts, savings goals; `calculations.py` (pure maths), `services.py` (balances, reports, locked writes)
+- `apps/future_plans/` plans, action items, cost/savings figures and the affordability check
+- `apps/interests/` hobbies, favourites, bucket list and private image delivery
 - `apps/dashboard/` summary service + dashboard view (totals will be computed in `services.py`, not templates)
 - Ownership: every private model inherits `OwnedModel`; views use `OwnerQuerysetMixin` so other users' objects return 404.
 - Time: datetimes stored in UTC, displayed in the user's timezone (middleware); use `core.services.local_today(user)` for calendar dates.
@@ -68,9 +70,16 @@ HSTS preload is opt-in (`DJANGO_HSTS_PRELOAD=true`) and is the one `check --depl
 - Concurrency: writes lock account rows (ordered by id) then debt rows. `tests/test_finance_concurrency.py` uses real parallel connections.
 - Repayment planner and monthly-saving figures are estimates: no investment returns, inflation or rate changes, not financial advice.
 
+## Future plans and interests
+- A plan keeps three figures apart: your estimated cost, the linked savings goal's target, and the amount actually saved (sum of real contributions). The monthly estimate is remaining / months left (a partial month counts as one) and assumes no returns, inflation or price changes.
+- The affordability page only shows what YOUR assumptions imply; it never says something "is affordable".
+- Uploaded images are stored under `LIFEOS_MEDIA_ROOT` (default `./media`, git-ignored) with random names and are only served by `/interests/<id>/image/` after an owner check. In production put MEDIA_ROOT on persistent storage and back it up; do not expose it through the web server.
+- Bucket-list items are optional to schedule: "Add to my planner" creates a task only when you press it.
+
 ## Known limitations
-- Future plans, interests, reviews are not implemented yet (Phases 4-5).
-- Finance: CSV import is not implemented (export only); no recurring transactions, bank connections, currency conversion or interest-accrual schedules; savings goals are not yet linkable to future plans (Phase 4).
+- Reviews, journal, insights and reminders are not implemented yet (Phase 5).
+- Images are stored and served as uploaded (no resizing/thumbnails, no malware scanning).
+- Finance: CSV import is not implemented (export only); no recurring transactions, bank connections, currency conversion or interest-accrual schedules; 
 - Recurring tasks, habit reminders, dashboard widget customisation and history charts are not implemented.
 - Habit statistics for a *past* period that contained a pause count the paused days as missed (pause intervals are not stored).
 - Habit weekly/monthly figures for "times per week" habits are an approximation for partial weeks/months.

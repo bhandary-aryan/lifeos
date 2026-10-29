@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card-surface mx-auto max-w-2xl p-6" x-data="{ bucket: {% if form.is_bucket_list.value %}true{% else %}false{% endif %} }">
+  <form method="post" enctype="multipart/form-data" class="space-y-4" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="alert alert-error text-sm" role="alert">{{ form.non_field_errors.0 }}</div>{% endif %}
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="sm:col-span-2">{% include "components/field.html" with field=form.name %}</div>
+      <div>{% include "components/field.html" with field=form.category %}</div><div>{% include "components/field.html" with field=form.status %}</div>
+      <div class="sm:col-span-2">{% include "components/field.html" with field=form.description %}</div>
+      <div class="sm:col-span-2">{% include "components/field.html" with field=form.tags_text %}</div>
+      <div>{% include "components/field.html" with field=form.priority %}</div>
+      <div>{% include "components/field.html" with field=form.image %}{% if item and item.image %}<label class="mt-2 flex items-center gap-2 text-sm">{{ form.clear_image }} {{ form.clear_image.label }}</label>{% endif %}</div>
+      <div class="sm:col-span-2">{% include "components/field.html" with field=form.notes %}</div>
+      <div class="sm:col-span-2"><label class="flex cursor-pointer items-center gap-3 rounded-btn border border-base-300 px-3 py-2">{{ form.is_bucket_list }}<span class="text-sm font-medium">{{ form.is_bucket_list.label }}</span></label>
+        {% for e in form.is_bucket_list.errors %}<p class="field-error" role="alert">{{ e }}</p>{% endfor %}</div>
+      <div x-show="bucket" x-cloak>{% include "components/field.html" with field=form.target_date %}</div>
+      <div x-show="bucket" x-cloak>{% include "components/field.html" with field=form.estimated_cost %}</div>
+      <div x-show="bucket" x-cloak>{% include "components/field.html" with field=form.currency %}</div>
+      <div x-show="bucket" x-cloak>{% include "components/field.html" with field=form.linked_plan %}</div>
+    </div>
+    <div class="flex justify-end gap-2 pt-2"><a href="{{ cancel_url }}" class="btn btn-ghost btn-sm">Cancel</a><button type="submit" class="btn btn-primary btn-sm">Save</button></div>
+  </form>
+</div>
+{% endblock %}

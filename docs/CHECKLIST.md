@@ -44,6 +44,19 @@
 - [ ] Interest accrual / amortisation schedules – NOT modelled (principal tracker only)
 - [ ] Multi-currency conversion – deliberately not done; reports are per currency
 - [ ] Recurring transactions, bank connections – out of scope (Phase 6)
-## Phase 4 – future plans, interests  [todo]
+## Phase 4 – future plans, interests  [done, with listed gaps]
+- [x] Future plans: category, priority, status, target date, estimated cost, linked goal, linked savings goal (one goal per plan), action items
+- [x] Estimated cost / savings-goal target / actual saved kept as three separate figures; monthly estimate = remaining / months left; what-if date recalculates without saving
+- [x] Achieved, overdue ("needs updating") and no-date states handled; no division by zero; past dates never shown as achievable
+- [x] One-click "create & link savings goal" from a plan; savings goal page links back to its plan
+- [x] Affordability check (user-entered assumptions; pre-fill from last 3 full months' net cash flow; wording never promises affordability)
+- [x] Hobbies / favourites / bucket list: 11 kinds, enjoy-vs-want-to-try statuses, tags, priority, notes, optional image
+- [x] Bucket-list extras (target date, cost, linked plan, optional "add to planner") only on bucket-list items
+- [x] Images: random file names, format whitelist (JPEG/PNG/GIF/WebP), size limit, served only through an owner-checked view, files removed on replace/clear/delete/account deletion
+- [x] Dashboard: plans within 90 days; a gentle "something to look forward to" card (no streaks, hidden when empty)
+- [x] Data export and account deletion cover plans and interests
+- [ ] Scenario settings (returns/inflation) for affordability – NOT implemented; deliberately assumption-free
+- [ ] Image thumbnails / resizing – NOT implemented (originals are served)
+- [ ] Tying plans to a calendar view – NOT implemented
 ## Phase 5 – reviews, insights, polish  [todo]
 ## Phase 6 – advanced  [todo]
