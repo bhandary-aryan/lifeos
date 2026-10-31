@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "apps.finance",
     "apps.future_plans",
     "apps.interests",
+    "apps.reflections",
     "apps.dashboard",
 ]
 
@@ -69,6 +70,10 @@ DATABASES = {"default": env.db("DATABASE_URL")}
 DATABASES["default"]["CONN_MAX_AGE"] = env.int("DB_CONN_MAX_AGE", default=60)
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Used for login throttling. The default is per-process memory; in production with several workers set
+# CACHE_URL to a shared cache (e.g. redis://host:6379/1 or memcache://...) so limits apply across them.
+CACHES = {"default": env.cache("CACHE_URL", default="locmemcache://lifeos")}
+
 AUTH_USER_MODEL = "accounts.User"
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -79,6 +84,8 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+CSRF_FAILURE_VIEW = "apps.core.views.csrf_failure"
 
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "dashboard:home"
@@ -109,6 +116,9 @@ CSRF_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 14
 
 PASSWORD_RESET_TIMEOUT = 60 * 60 * 3  # reset links valid for 3 hours
+
+# Only enable behind a proxy that OVERWRITES X-Forwarded-For (see apps/accounts/throttle.py).
+THROTTLE_TRUST_X_FORWARDED_FOR = env.bool("LIFEOS_TRUST_X_FORWARDED_FOR", default=False)
 
 # Never log request bodies or credentials.
 LOGGING = {

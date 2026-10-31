@@ -61,7 +61,7 @@ def test_dashboard_cards_link_to_modules(auth_client):
 
 # ---------- navigation ----------
 NAV = ["dashboard:home", "goals:list", "planner:today", "planner:habits", "finance:overview",
-       "future_plans:list", "interests:list", "core:reviews", "accounts:settings"]
+       "future_plans:list", "interests:list", "reflections:list", "accounts:settings"]
 
 
 def test_all_nine_nav_destinations_load_and_are_listed(auth_client):
@@ -84,9 +84,9 @@ def test_current_page_marked_active(auth_client):
     assert 'aria-current="page"' in html
 
 
-def test_placeholder_pages_say_they_are_not_built(auth_client):
-    html = auth_client.get(reverse("core:reviews")).content.decode()
-    assert "isn't built yet" in html and "Phase 5" in html
+def test_every_module_is_now_built_no_placeholders_remain(auth_client):
+    for name in NAV:
+        assert "isn't built yet" not in auth_client.get(reverse(name)).content.decode(), name
 
 
 def test_quick_add_entries_are_disabled_not_fake(auth_client):

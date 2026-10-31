@@ -36,7 +36,10 @@
   <section class="card-surface p-6">
     <h2 class="text-base font-semibold">Your data</h2>
     <p class="mt-1 text-sm text-base-content/60">Download everything {{ SITE_NAME }} holds about you as a JSON file.</p>
-    <a href="{% url 'accounts:export' %}" class="btn btn-outline btn-sm mt-4"><i data-lucide="download" class="h-4 w-4"></i> Export my data</a>
+    <div class="mt-4 flex flex-wrap gap-2"><a href="{% url 'accounts:export' %}" class="btn btn-outline btn-sm"><i data-lucide="download" class="h-4 w-4"></i> Everything (JSON)</a>
+      <a href="{% url 'accounts:export_csv' 'tasks' %}" class="btn btn-ghost btn-sm">Tasks (CSV)</a><a href="{% url 'accounts:export_csv' 'goals' %}" class="btn btn-ghost btn-sm">Goals (CSV)</a>
+      <a href="{% url 'accounts:export_csv' 'habit_logs' %}" class="btn btn-ghost btn-sm">Habit log (CSV)</a><a href="{% url 'accounts:export_csv' 'journal' %}" class="btn btn-ghost btn-sm">Journal (CSV)</a>
+      <a href="{% url 'finance:transactions_export' %}" class="btn btn-ghost btn-sm">Transactions (CSV)</a></div>
   </section>
 
   <section class="card-surface border-error/40 p-6">

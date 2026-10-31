@@ -1,11 +1,6 @@
-from django.urls import path
-
-from .views import ComingSoonView
+from django.urls import path  # noqa: F401
 
 app_name = "core"
 
-urlpatterns = [
-    path("reviews/", ComingSoonView.as_view(
-        title="Reviews & Insights", phase="Phase 5", icon="line-chart",
-        description="Weekly reviews, journal and historical insights."), name="reviews"),
-]
+# Every module is now implemented; `ComingSoonView` remains available in core.views for future modules.
+urlpatterns: list = []

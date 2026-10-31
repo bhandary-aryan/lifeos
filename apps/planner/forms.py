@@ -59,9 +59,9 @@ class QuickTaskForm(_TaskFormBase):
         fields = ["title", "due_date", "priority", "estimated_minutes", "goal", "milestone"]
         widgets = {
             "title": forms.TextInput(attrs={"class": INPUT, "placeholder": "Add a task…", "aria-label": "Task title"}),
-            "due_date": date_input(),
-            "priority": forms.Select(attrs={"class": SELECT}),
-            "estimated_minutes": forms.NumberInput(attrs={"class": INPUT, "min": 0, "max": 1440, "placeholder": "min"}),
+            "due_date": forms.DateInput(attrs={"type": "date", "class": INPUT, "aria-label": "Due date"}, format="%Y-%m-%d"),
+            "priority": forms.Select(attrs={"class": SELECT, "aria-label": "Priority"}),
+            "estimated_minutes": forms.NumberInput(attrs={"class": INPUT, "min": 0, "max": 1440, "placeholder": "min", "aria-label": "Estimated minutes"}),
         }
 
     def __init__(self, *args, user, **kwargs):

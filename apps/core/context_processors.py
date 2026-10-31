@@ -9,7 +9,7 @@ NAV_ITEMS = [
     ("finance:overview", "Finances", "wallet"),
     ("future_plans:list", "Future Plans", "compass"),
     ("interests:list", "Hobbies & Bucket List", "sparkles"),
-    ("core:reviews", "Reviews & Insights", "line-chart"),
+    ("reflections:list", "Reviews & Insights", "line-chart"),
     ("accounts:settings", "Settings", "settings"),
 ]
 
@@ -24,10 +24,13 @@ def site(request):
             name == "planner:today" and path.startswith("/planner/"))
         if name == "finance:overview":
             active = path.startswith("/finance/")
+        if name == "reflections:list":
+            active = path.startswith(("/reviews/", "/journal/", "/insights/"))
         nav.append({"url": url, "label": label, "icon": icon, "active": active})
     theme = "system"
     if getattr(request, "user", None) and request.user.is_authenticated:
         profile = getattr(request.user, "profile", None)
         if profile:
             theme = profile.theme
-    return {"SITE_NAME": settings.SITE_NAME, "nav_items": nav, "theme_pref": theme}
+    is_demo = bool(getattr(request, "user", None) and request.user.is_authenticated and request.user.email.endswith("@demo.lifeos.invalid"))
+    return {"SITE_NAME": settings.SITE_NAME, "nav_items": nav, "theme_pref": theme, "is_demo": is_demo}

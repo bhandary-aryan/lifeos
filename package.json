@@ -2,6 +2,7 @@
   "name": "lifeos-frontend",
   "private": true,
   "scripts": {
+    "vendor": "bash scripts_vendor.sh",
     "build:css": "tailwindcss -c tailwind.config.js -i static/src/input.css -o static/css/app.css --minify",
     "watch:css": "tailwindcss -c tailwind.config.js -i static/src/input.css -o static/css/app.css --watch"
   },

@@ -107,3 +107,11 @@ def confirm_and_delete(request, obj, noun, cancel_url, success_url, deleter, mes
         messages.success(request, message)
         return redirect(safe_next(request, success_url))
     return render(request, "components/confirm_delete.html", {"object": obj, "noun": noun, "page_title": f"Delete {noun}", "cancel_url": cancel_url, "extra": extra})
+
+
+def csrf_failure(request, reason=""):
+    """Friendly page for failed CSRF checks. The technical reason is deliberately not shown to the visitor."""
+    from django.template.loader import render_to_string
+    from django.http import HttpResponseForbidden
+
+    return HttpResponseForbidden(render_to_string("403.html", request=request))

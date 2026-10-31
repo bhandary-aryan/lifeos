@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "reflections/_tabs.html" %}
+<div class="space-y-4">
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <form method="get" class="flex flex-wrap items-end gap-2" role="search"><input type="search" name="q" value="{{ f.q }}" placeholder="Search entries…" class="input input-bordered input-sm w-52" aria-label="Search journal">
+      <label class="text-xs">From <input type="date" name="from" value="{{ f.from }}" class="input input-bordered input-sm"></label><label class="text-xs">To <input type="date" name="to" value="{{ f.to }}" class="input input-bordered input-sm"></label>
+      <button class="btn btn-sm btn-outline">Apply</button>{% if qs %}<a href="{% url 'reflections:journal' %}" class="btn btn-sm btn-ghost">Clear</a>{% endif %}</form>
+    <a href="{% url 'reflections:journal_create' %}" class="btn btn-primary btn-sm"><i data-lucide="plus" class="h-4 w-4"></i> New entry</a></div>
+  {% if page_obj.object_list %}
+  <div class="card-surface divide-y divide-base-300">{% for e in page_obj.object_list %}<a href="{% url 'reflections:journal_detail' e.pk %}" class="flex items-center justify-between gap-3 px-5 py-4 hover:bg-base-200"><span><span class="font-medium">{{ e.title|default:"Untitled entry" }}</span></span><span class="text-xs text-base-content/60">{{ e.date|date:"j M Y" }} · {{ e.word_count }} words</span></a>{% endfor %}</div>
+  {% include "components/pager.html" %}
+  {% else %}
+  <div class="card-surface p-10 text-center"><h2 class="text-lg font-semibold">{% if qs %}No entries match{% elif has_any %}Nothing here{% else %}Your private journal{% endif %}</h2><p class="mx-auto mt-1 max-w-md text-sm text-base-content/60">{% if qs %}Try different words or dates.{% else %}Write whenever you like. Entries stay private and are never shown on the dashboard.{% endif %}</p></div>
+  {% endif %}
+  <p class="text-xs text-base-content/50">Entry text is stored as plain text in the database (not end-to-end encrypted). The list shows titles only.</p>
+</div>
+{% endblock %}

@@ -28,3 +28,17 @@
   .htmx-request.htmx-indicator { opacity: 1; }
   .htmx-indicator { opacity: 0; transition: opacity 150ms; }
 }
+
+
+/* Accessibility: DaisyUI's `text-base-content/NN` utilities are too faint for small text (3.2:1 at /50 in the
+   light theme). These floors keep every muted-text step at WCAG AA (>= 4.5:1) on both backgrounds in both
+   themes; tests/test_accessibility.py recomputes the ratios from these exact values. */
+.text-base-content\/40 { color: oklch(var(--bc) / 0.66); }
+.text-base-content\/50 { color: oklch(var(--bc) / 0.70); }
+.text-base-content\/60 { color: oklch(var(--bc) / 0.74); }
+.text-base-content\/70 { color: oklch(var(--bc) / 0.80); }
+.text-base-content\/80 { color: oklch(var(--bc) / 0.86); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}

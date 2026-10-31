@@ -76,12 +76,15 @@ class ProfileForm(forms.ModelForm):
 class PreferencesForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ["currency", "timezone", "date_format", "week_start", "daily_available_minutes", "theme"]
+        fields = ["currency", "timezone", "date_format", "week_start", "daily_available_minutes", "reminders_enabled", "reminder_lead_days", "theme"]
         widgets = {
             **{f: forms.Select(attrs={"class": SELECT}) for f in ["currency", "timezone", "date_format", "week_start", "theme"]},
             "daily_available_minutes": forms.NumberInput(attrs={"class": INPUT, "min": 30, "max": 1440, "step": 15}),
+            "reminder_lead_days": forms.NumberInput(attrs={"class": INPUT, "min": 1, "max": 14}),
+            "reminders_enabled": forms.CheckboxInput(attrs={"class": "checkbox"}),
         }
-        labels = {"daily_available_minutes": "Available minutes per day"}
+        labels = {"daily_available_minutes": "Available minutes per day", "reminders_enabled": "Show in-app reminders",
+                  "reminder_lead_days": "Remind me this many days ahead"}
 
 
 class LifeAreasForm(forms.Form):

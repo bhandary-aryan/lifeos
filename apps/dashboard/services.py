@@ -16,6 +16,8 @@ from apps.goals.models import Goal
 from apps.goals.services import annotate_progress, attach_progress
 from apps.planner import habit_services as hs
 from apps.planner.models import Habit, HabitLog, Task
+from apps.planner.services import week_start_for
+from apps.reflections.models import WeeklyReview
 from apps.planner.services import OPEN_STATUSES
 
 DAY = dt.timedelta(days=1)
@@ -89,5 +91,7 @@ def build_dashboard_summary(user):
         "habits_done": sum(1 for r in habit_rows if r["done_today"]),
         "has_any_data": bool(priorities or overdue or due_soon or goals or habit_rows),
         "plans": approaching_plans(user, today),
+        "review": {"week": week_start_for(today, profile.week_start),
+                   "done": WeeklyReview.objects.filter(owner=user, week_start=week_start_for(today, profile.week_start)).exists()},
         "interests": interests_block(user, today),
     }

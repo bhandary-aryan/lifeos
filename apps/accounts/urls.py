@@ -13,10 +13,11 @@ urlpatterns = [
     path("settings/", views.settings_view, name="settings"),
     path("settings/theme/", views.set_theme, name="set_theme"),
     path("settings/export/", views.export_data, name="export"),
+    path("settings/export/<str:kind>.csv", views.export_csv, name="export_csv"),
     path("settings/delete/", views.delete_account_view, name="delete"),
     path(
         "password-reset/",
-        auth_views.PasswordResetView.as_view(
+        views.ThrottledPasswordResetView.as_view(
             template_name="accounts/password_reset_form.html",
             email_template_name="accounts/password_reset_email.txt",
             subject_template_name="accounts/password_reset_subject.txt",

@@ -13,6 +13,7 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.models import CURRENCY_CHOICES
 from apps.core.services import local_today, parse_date
+from apps.core.csv_utils import csv_safe
 from apps.core.views import confirm_and_delete, safe_next
 
 from . import services as fin
@@ -240,17 +241,7 @@ def transaction_delete(request, pk):
     return _confirm(request, tx, "transaction", back, back, fin.delete_transaction, "Transaction deleted; balances were recalculated.")
 
 
-def _csv_safe(value):
-    s = "" if value is None else str(value)
-    return "'" + s if s[:1] in ("=", "+", "-", "@", "\t", "\r") and not _is_number(s) else s
-
-
-def _is_number(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
+_csv_safe = csv_safe
 
 
 @login_required

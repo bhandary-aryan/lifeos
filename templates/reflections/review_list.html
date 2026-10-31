@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "reflections/_tabs.html" %}
+<div class="space-y-4">
+  <section class="card-surface flex flex-wrap items-center justify-between gap-3 p-5">
+    <div><h2 class="text-base font-semibold">This week</h2><p class="text-sm text-base-content/60">Week of {{ current_week|date:"j M Y" }} — {% if current_done %}reviewed{% else %}not reviewed yet. A review is always optional.{% endif %}</p></div>
+    <a href="{% url 'reflections:review_week' current_week|date:'Y-m-d' %}" class="btn btn-primary btn-sm">{% if current_done %}Open this week's review{% else %}Start this week's review{% endif %}</a>
+  </section>
+  {% if page_obj.object_list %}
+  <div class="card-surface divide-y divide-base-300">
+    {% for r in page_obj.object_list %}
+    <a href="{% url 'reflections:review_week' r.week_start|date:'Y-m-d' %}" class="flex items-center justify-between gap-3 px-5 py-4 hover:bg-base-200">
+      <span class="font-medium">Week of {{ r.week_start|date:"j M Y" }}</span><span class="text-xs text-base-content/60">{{ r.filled_sections }} of {{ total_sections }} sections written</span></a>{% endfor %}
+  </div>
+  {% include "components/pager.html" %}
+  {% else %}
+  <div class="card-surface p-10 text-center"><h2 class="text-lg font-semibold">No reviews yet</h2><p class="mx-auto mt-1 max-w-md text-sm text-base-content/60">A weekly review is a few minutes to look back at what happened and decide what matters next. Skip any week you like.</p></div>
+  {% endif %}
+  <p class="text-xs text-base-content/50">Review text is private to you and never appears on the dashboard.</p>
+</div>
+{% endblock %}

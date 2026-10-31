@@ -18,6 +18,8 @@ def export_user_data(user):
     from apps.future_plans.models import FuturePlan, PlanAction
     from apps.interests.models import InterestItem
 
+    from apps.reflections.models import JournalEntry, WeeklyReview
+
     p = user.profile
     iso = lambda v: v.isoformat() if v else None  # noqa: E731
     return {
@@ -33,6 +35,8 @@ def export_user_data(user):
             "date_format": p.date_format,
             "week_start": p.week_start,
             "daily_available_minutes": p.daily_available_minutes,
+            "reminders_enabled": p.reminders_enabled,
+            "reminder_lead_days": p.reminder_lead_days,
             "theme": p.theme,
             "life_areas": p.life_areas,
             "onboarding_completed": p.onboarding_completed,
@@ -108,6 +112,11 @@ def export_user_data(user):
                        "estimated_cost": str(i.estimated_cost) if i.estimated_cost is not None else None, "currency": i.currency,
                        "linked_task_id": i.linked_task_id, "linked_plan_id": i.linked_plan_id, "completed_on": iso(i.completed_on)}
                       for i in InterestItem.objects.filter(owner=user)],
+        "weekly_reviews": [{"week_start": iso(r.week_start), "accomplishments": r.accomplishments, "goals_progressed": r.goals_progressed,
+                            "obstacles": r.obstacles, "lessons": r.lessons, "habits_went_well": r.habits_went_well,
+                            "financial_observations": r.financial_observations, "postponed": r.postponed, "next_priorities": r.next_priorities}
+                           for r in WeeklyReview.objects.filter(owner=user)],
+        "journal_entries": [{"date": iso(j.date), "title": j.title, "body": j.body} for j in JournalEntry.objects.filter(owner=user)],
         "habit_logs": [
             {"habit_id": l.habit_id, "date": iso(l.date), "note": l.note}
             for l in HabitLog.objects.filter(owner=user)

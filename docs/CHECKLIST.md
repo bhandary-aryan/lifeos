@@ -58,5 +58,17 @@
 - [ ] Scenario settings (returns/inflation) for affordability – NOT implemented; deliberately assumption-free
 - [ ] Image thumbnails / resizing – NOT implemented (originals are served)
 - [ ] Tying plans to a calendar view – NOT implemented
-## Phase 5 – reviews, insights, polish  [todo]
-## Phase 6 – advanced  [todo]
+## Phase 5 – reviews, insights, polish  [done, with listed gaps]
+- [x] Weekly review (8 prompts) with a data snapshot of the week; week normalised to the user's week start; optional, no future weeks
+- [x] Private journal (titles only in lists; never on the dashboard)
+- [x] Insights: goals/milestones per month, tasks per week, habit consistency, savings, monthly spending — with chart text alternatives and data tables
+- [x] In-app reminders (tasks, milestones, goals, debt payments, plan steps, review nudge) honouring on/off and look-ahead days
+- [x] More exports: JSON (now incl. reviews/journal), CSV for tasks, goals, habit log, journal, transactions
+- [x] Accessibility: contrast computed from the real theme (fixed 3 failing light-theme colours and the muted-text steps), reduced-motion, labelled controls, icon-button names, one h1 per page — enforced by tests
+- [x] Login and password-reset throttling; friendly 400/403/404/500/CSRF pages
+- [x] Dev-only demo seeder with labelling and banner
+- [x] README, ARCHITECTURE, SECURITY, DEPLOYMENT docs
+- [x] Whole suite re-run under pinned dates (Sunday 2027-01-03, leap day 2028-02-29 23:30 UTC)
+- [ ] Email/push reminders, quiet hours – NOT implemented (need a scheduler; Phase 6)
+- [ ] Real-browser/device visual QA – NOT done in this environment
+## Phase 6 – advanced  [not started: CSV import, recurring items, email reminders, scenarios, calendar sync, PWA, bank integrations]

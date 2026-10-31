@@ -78,7 +78,7 @@ def test_logout_requires_post_and_ends_session(auth_client):
 @pytest.mark.parametrize("name", [
     "dashboard:home", "accounts:settings", "accounts:export", "accounts:delete",
     "goals:list", "planner:today", "planner:habits", "finance:overview",
-    "future_plans:list", "interests:list", "core:reviews",
+    "future_plans:list", "interests:list", "reflections:list",
 ])
 def test_private_pages_redirect_anonymous(client, name):
     r = client.get(reverse(name))
@@ -102,7 +102,7 @@ def test_csrf_enforced_on_state_changing_requests(user):
 def test_onboarding_saves_each_step_and_completes(auth_client, user):
     auth_client.post(reverse("accounts:onboarding", kwargs={"step": 1}), {"display_name": "Ali"})
     auth_client.post(reverse("accounts:onboarding", kwargs={"step": 2}), {
-        "currency": "NPR", "timezone": "Asia/Kathmandu", "date_format": "Y-m-d", "week_start": "6", "daily_available_minutes": "300", "theme": "dark"})
+        "currency": "NPR", "timezone": "Asia/Kathmandu", "date_format": "Y-m-d", "week_start": "6", "daily_available_minutes": "300", "reminders_enabled": "on", "reminder_lead_days": "3", "theme": "dark"})
     r = auth_client.post(reverse("accounts:onboarding", kwargs={"step": 3}), {"life_areas": ["career", "health"]})
     user.profile.refresh_from_db()
     p = user.profile
@@ -122,7 +122,7 @@ def test_onboarding_can_be_skipped_entirely(auth_client, user):
 
 def test_onboarding_rejects_invalid_values(auth_client, user):
     r = auth_client.post(reverse("accounts:onboarding", kwargs={"step": 2}), {
-        "currency": "XXX", "timezone": "Mars/Base", "date_format": "Y-m-d", "week_start": "3", "daily_available_minutes": "300", "theme": "dark"})
+        "currency": "XXX", "timezone": "Mars/Base", "date_format": "Y-m-d", "week_start": "3", "daily_available_minutes": "300", "reminders_enabled": "on", "reminder_lead_days": "3", "theme": "dark"})
     assert r.status_code == 200
     user.profile.refresh_from_db()
     assert user.profile.currency == "GBP"
@@ -138,17 +138,30 @@ def test_settings_page_and_updates(auth_client, user):
     auth_client.post(reverse("accounts:settings"), {"section": "profile", "profile-display_name": "Alice"})
     auth_client.post(reverse("accounts:settings"), {
         "section": "prefs", "prefs-currency": "USD", "prefs-timezone": "America/New_York",
-        "prefs-date_format": "m/d/Y", "prefs-week_start": "6", "prefs-daily_available_minutes": "360", "prefs-theme": "light"})
+        "prefs-date_format": "m/d/Y", "prefs-week_start": "6", "prefs-daily_available_minutes": "360", "prefs-reminders_enabled": "on", "prefs-reminder_lead_days": "3", "prefs-theme": "light"})
     user.profile.refresh_from_db()
     assert (user.profile.display_name, user.profile.currency, user.profile.timezone) == ("Alice", "USD", "America/New_York")
     assert user.profile.daily_available_minutes == 360
+
+
+def test_reminder_preferences_saved_and_validated(auth_client, user):
+    base = {"section": "prefs", "prefs-currency": "GBP", "prefs-timezone": "UTC", "prefs-date_format": "d/m/Y", "prefs-week_start": "0",
+            "prefs-daily_available_minutes": "480", "prefs-theme": "light"}
+    auth_client.post(reverse("accounts:settings"), {**base, "prefs-reminder_lead_days": "7"})          # checkbox absent => off
+    user.profile.refresh_from_db()
+    assert user.profile.reminders_enabled is False and user.profile.reminder_lead_days == 7
+    for bad in ("0", "15", "abc", ""):
+        r = auth_client.post(reverse("accounts:settings"), {**base, "prefs-reminders_enabled": "on", "prefs-reminder_lead_days": bad})
+        assert r.status_code == 200
+    user.profile.refresh_from_db()
+    assert user.profile.reminder_lead_days == 7 and user.profile.reminders_enabled is False
 
 
 def test_available_minutes_validated(auth_client, user):
     for bad in ("0", "5000", "abc"):
         r = auth_client.post(reverse("accounts:settings"), {
             "section": "prefs", "prefs-currency": "GBP", "prefs-timezone": "UTC", "prefs-date_format": "d/m/Y",
-            "prefs-week_start": "0", "prefs-daily_available_minutes": bad, "prefs-theme": "light"})
+            "prefs-week_start": "0", "prefs-daily_available_minutes": bad, "prefs-reminders_enabled": "on", "prefs-reminder_lead_days": "3", "prefs-theme": "light"})
         assert r.status_code == 200
     user.profile.refresh_from_db()
     assert user.profile.daily_available_minutes == 480
@@ -157,7 +170,7 @@ def test_available_minutes_validated(auth_client, user):
 def test_settings_invalid_prefs_show_errors_and_do_not_save(auth_client, user):
     r = auth_client.post(reverse("accounts:settings"), {
         "section": "prefs", "prefs-currency": "ZZZ", "prefs-timezone": "UTC",
-        "prefs-date_format": "m/d/Y", "prefs-week_start": "6", "prefs-daily_available_minutes": "360", "prefs-theme": "light"})
+        "prefs-date_format": "m/d/Y", "prefs-week_start": "6", "prefs-daily_available_minutes": "360", "prefs-reminders_enabled": "on", "prefs-reminder_lead_days": "3", "prefs-theme": "light"})
     assert r.status_code == 200 and "Select a valid choice" in r.content.decode()
     user.profile.refresh_from_db()
     assert user.profile.currency == "GBP"

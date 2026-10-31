@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "reflections/_tabs.html" %}
+<article class="card-surface mx-auto max-w-3xl p-6">
+  <div class="flex flex-wrap items-start justify-between gap-3"><div><p class="text-xs text-base-content/60">{{ entry.date|date:"l, j F Y" }} · {{ entry.word_count }} words</p><h2 class="mt-1 text-xl font-semibold">{{ entry.title|default:"Untitled entry" }}</h2></div>
+    <div class="flex gap-2"><a class="btn btn-outline btn-sm" href="{% url 'reflections:journal_update' entry.pk %}">Edit</a><a class="btn btn-ghost btn-sm text-error" href="{% url 'reflections:journal_delete' entry.pk %}">Delete</a></div></div>
+  <div class="mt-5 whitespace-pre-line text-sm leading-relaxed">{{ entry.body }}</div>
+</article>
+{% endblock %}

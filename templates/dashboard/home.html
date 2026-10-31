@@ -104,6 +104,10 @@
     {% if not summary.interests.soon and not summary.interests.idea %}<p class="mt-2 text-sm text-base-content/60">{{ summary.interests.bucket_open_count }} thing{{ summary.interests.bucket_open_count|pluralize }} on your bucket list.</p>{% endif %}</section>
   {% endif %}
 
+  <section class="card-surface flex flex-wrap items-center justify-between gap-3 p-5" aria-label="Weekly review">
+    <div><h3 class="text-base font-semibold">Weekly review</h3><p class="text-sm text-base-content/60">{% if summary.review.done %}This week is reviewed. Nice.{% else %}Optional: a few minutes to look back on this week.{% endif %}</p></div>
+    <a href="{% url 'reflections:review_week' summary.review.week|date:'Y-m-d' %}" class="btn btn-outline btn-sm">{% if summary.review.done %}Open review{% else %}Start review{% endif %}</a></section>
+
   {% if summary.life_area_labels %}<p class="text-xs text-base-content/60">Your focus areas: {{ summary.life_area_labels|join:", " }}</p>{% endif %}
 </div>
 {% endblock %}

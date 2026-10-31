@@ -23,6 +23,12 @@
           <p class="hidden text-xs text-base-content/60 sm:block">{% now "l, j F Y" %}</p>
         </div>
 
+        <!-- Reminders bell: the count is fetched lazily so normal page loads stay cheap -->
+        <a href="{% url 'dashboard:reminders' %}" class="btn btn-ghost btn-circle btn-sm relative" aria-label="Reminders">
+          <i data-lucide="bell" class="h-5 w-5"></i>
+          <span hx-get="{% url 'dashboard:reminders_badge' %}" hx-trigger="load" hx-swap="outerHTML"></span>
+        </a>
+
         <!-- Quick add: Phase 2 modules are live; finance entries stay disabled until Phase 3 -->
         <div class="dropdown dropdown-end">
           <button type="button" tabindex="0" class="btn btn-primary btn-sm gap-1" aria-haspopup="true">
@@ -47,7 +53,7 @@
             <li><a href="{% url 'accounts:settings' %}"><i data-lucide="settings" class="h-4 w-4"></i> Settings</a></li>
             <li>
               <button type="button" x-data="themeToggle()" @click="toggle()">
-                <i data-lucide="sun-moon" class="h-4 w-4"></i> <span x-text="label"></span>
+                <i data-lucide="sun-moon" class="h-4 w-4"></i> <span x-text="label">{% if theme_pref == 'light' %}Theme: Light{% elif theme_pref == 'dark' %}Theme: Dark{% else %}Theme: Device{% endif %}</span>
               </button>
             </li>
             <li>
@@ -60,6 +66,7 @@
       </div>
     </header>
 
+    {% if is_demo %}<div class="bg-warning px-4 py-2 text-center text-sm font-medium text-warning-content" role="note">This is a demo account. Everything here is sample data, not real information.</div>{% endif %}
     <main id="main" class="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-24 lg:px-8 lg:pb-10">
       {% include "components/messages.html" %}
       <div class="{% if messages %}mt-4{% endif %}">{% block content %}{% endblock %}</div>

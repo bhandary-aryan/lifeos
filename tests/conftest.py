@@ -123,3 +123,29 @@ def make_savings(db):
     def _make(owner, name="Emergency fund", target="1000", **kw):
         return SavingsGoal.objects.create(owner=owner, name=name, target_amount=money(target), **kw)
     return _make
+
+
+@pytest.fixture(autouse=True)
+def _clear_cache_between_tests():
+    """The throttle keeps counters in the cache; never let one test's failures leak into another."""
+    from django.core.cache import cache
+    cache.clear()
+    yield
+    cache.clear()
+
+
+@pytest.fixture(autouse=True)
+def _optional_clock_pin(monkeypatch):
+    """Robustness check: `LIFEOS_TEST_NOW=2027-01-03T12:00` re-runs the whole suite as if it were that moment.
+
+    Used to prove no test (or feature) silently depends on the weekday, month end or year boundary it happens to run on.
+    Tests that need a specific moment still patch `timezone.now` themselves and win, since they run after this fixture.
+    """
+    import os
+
+    raw = os.environ.get("LIFEOS_TEST_NOW")
+    if raw:
+        from datetime import datetime, timezone as dtz
+        from django.utils import timezone
+        fixed = datetime.fromisoformat(raw).replace(tzinfo=dtz.utc)
+        monkeypatch.setattr(timezone, "now", lambda: fixed)

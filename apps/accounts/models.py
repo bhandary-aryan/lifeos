@@ -108,6 +108,10 @@ class Profile(models.Model):
         validators=[MinValueValidator(30), MaxValueValidator(1440)],
         help_text="Time you realistically have for planned tasks each day.",
     )
+    reminders_enabled = models.BooleanField(default=True, help_text="Show in-app reminders for upcoming tasks, deadlines and payments.")
+    reminder_lead_days = models.PositiveSmallIntegerField(
+        default=3, validators=[MinValueValidator(1), MaxValueValidator(14)],
+        help_text="How many days ahead to remind you about deadlines (1-14).")
     life_areas = models.JSONField(default=list, blank=True)
     onboarding_completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
