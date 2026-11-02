@@ -52,6 +52,9 @@ LIFEOS_TEST_NOW=2028-02-29T23:30 python -m pytest   # run the whole suite "as if
 ```
 The suite covers calculations, integrity rules, ownership (every detail/edit/delete URL as another user), CSRF, concurrency with real parallel connections, accessibility (computed WCAG contrast + an HTML lint of ~40 rendered pages), timezone/DST boundaries and query-count regressions. `LIFEOS_TEST_NOW` exists to catch weekday/month-end/year-end assumptions.
 
+## Real-browser QA
+`qa/visual_sweep.js` drives a real browser over the app and fails on layout overflow, JS errors and small tap targets (see [qa/README.md](qa/README.md)). pytest cannot see layout; every responsive bug found so far came from this sweep.
+
 ## Documentation
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) – apps, models, money rules, calculations
 - [docs/SECURITY.md](docs/SECURITY.md) – what is protected, how, and what is *not*
@@ -64,5 +67,5 @@ The suite covers calculations, integrity rules, ownership (every detail/edit/del
 - Uploaded images are served as uploaded: no resizing, no malware scanning.
 - Habit statistics for a past period that contained a pause count the paused days as missed; "N per week" figures are approximate for partial weeks/months.
 - Reports are per currency; amounts in different currencies are never added or converted.
-- Visual layouts and the Chart.js charts were verified through rendered HTML, data tests and an accessibility lint, **not** by looking at them in a real browser or on real devices. Please do that before relying on the design.
+- Visual QA was done with a headless Chromium sweep (`qa/`, ~25 pages × desktop and 390px phone × light and dark): no horizontal overflow, JavaScript errors or tap targets under 24px, and I viewed screenshots of the key pages. It was **not** done on real phones/tablets, in Safari or Firefox, or with a screen reader — please spot-check those yourself.
 - The login throttle uses the cache; with several workers configure a shared cache (see docs/DEPLOYMENT.md).

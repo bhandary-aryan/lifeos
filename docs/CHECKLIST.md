@@ -70,5 +70,6 @@
 - [x] README, ARCHITECTURE, SECURITY, DEPLOYMENT docs
 - [x] Whole suite re-run under pinned dates (Sunday 2027-01-03, leap day 2028-02-29 23:30 UTC)
 - [ ] Email/push reminders, quiet hours – NOT implemented (need a scheduler; Phase 6)
-- [ ] Real-browser/device visual QA – NOT done in this environment
+- [x] Real-browser QA (headless Chromium, `qa/`): fixed 15 phone-overflow bugs (scrollable tab bars, wrapping forms, table containers), a habit tracker that hid today on phones, unreadable dark-theme chart labels, fractional count axes, low-contrast chart series, and ~30 undersized tap targets
+- [ ] Real devices, Safari/Firefox, screen readers – NOT done
 ## Phase 6 – advanced  [not started: CSV import, recurring items, email reminders, scenarios, calendar sync, PWA, bank integrations]

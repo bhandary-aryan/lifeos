@@ -110,9 +110,22 @@ class Lint(HTMLParser):
         self.main_id = None
         self.buttons = []                      # (tag, attrs, text_parts, has_icon)
         self.in_label = 0
+        self.open = []                         # (tag, class) of currently open non-void elements, for ancestor checks
+
+    def _scrolls(self):
+        return any("overflow-x-auto" in c for _, c in self.open)
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
+        cls = a.get("class") or ""
+        # Responsive rules learnt from real-browser QA: these overflowed a 390px phone.
+        # (a fixed-layout, full-width table such as the habit calendar can never exceed its container)
+        if tag == "table" and not self._scrolls() and "table-fixed" not in cls.split():
+            self.problems.append("<table> without an overflow-x-auto ancestor (will overflow narrow screens)")
+        if "tabs" in cls.split() and "overflow-x-auto" not in cls:
+            self.problems.append("tab bar without overflow-x-auto (will overflow narrow screens)")
+        if tag not in self.VOID:
+            self.open.append((tag, cls))
         if tag == "html" and a.get("lang"):
             self.has_lang = True
         if tag == "h1":
@@ -142,6 +155,10 @@ class Lint(HTMLParser):
             self.buttons[self.stack[-1]]["sr"] = True
 
     def handle_endtag(self, tag):
+        for i in range(len(self.open) - 1, -1, -1):
+            if self.open[i][0] == tag:
+                del self.open[i:]
+                break
         if tag == "label":
             self.in_label -= 1
         if tag in ("button", "a") and self.stack:
@@ -235,10 +252,14 @@ def test_onboarding_pages_pass_the_html_lint(auth_client):
 
 
 def test_lint_actually_detects_problems():
-    bad = '<html><body><main id="main"><h1>a</h1><h1>b</h1><input name="x"><img src="a.png"><button><i data-lucide="x"></i></button></main></body></html>'
+    bad = '<html><body><table></table><div class="tabs tabs-boxed"></div><main id="main"><h1>a</h1><h1>b</h1><input name="x"><img src="a.png"><button><i data-lucide="x"></i></button></main></body></html>'
     found = lint(bad)
     assert any("unlabelled input" in p for p in found) and any("no alt" in p for p in found) and any("icon-only button" in p for p in found)
     assert any("exactly one <h1>" in p for p in found) and any("no lang" in p for p in found) and any("skip" in p for p in found)
+    assert any("<table> without" in p for p in found) and any("tab bar without" in p for p in found)
+    assert lint('<html lang="en"><body><a href="#main">s</a><main id="main"><h1>a</h1><table class="table-fixed w-full"></table></main></body></html>') == []
+    scrolled = '<html lang="en"><body><a href="#main">s</a><main id="main"><h1>a</h1><div class="overflow-x-auto"><table></table></div><div class="tabs overflow-x-auto"></div></main></body></html>'
+    assert lint(scrolled) == []
     good = '<html lang="en"><body><a href="#main">Skip</a><main id="main"><h1>a</h1><label for="x">X</label><input id="x"><img src="a" alt=""><button aria-label="Close"><i data-lucide="x"></i></button></main></body></html>'
     assert lint(good) == []
 

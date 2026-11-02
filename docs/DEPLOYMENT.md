@@ -37,4 +37,4 @@ None are required today. If you later add email reminders, use a real scheduler 
 - [ ] `check --deploy` reviewed; `collectstatic` succeeds.
 - [ ] HTTPS working; cookies marked Secure; HSTS decision made.
 - [ ] Backups and a restore test in place.
-- [ ] You have looked at the UI in real browsers (light/dark, phone width) — see Known limitations in the README.
+- [ ] Run `qa/visual_sweep.js` against a staging copy and look at a few screenshots; spot-check on a real phone and in Safari/Firefox (see qa/README.md).

@@ -7,3 +7,5 @@ node_modules/
 .pytest_cache/
 *.sqlite3
 media/
+qa/out/
+qa/node_modules/

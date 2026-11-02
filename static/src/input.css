@@ -42,3 +42,10 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+
+/* Touch targets (WCAG 2.5.8): standalone small links, tag chips and disclosure toggles get a 24px minimum height.
+   Found by the real-browser sweep in qa/ (they measured 16-20px). */
+a.link.text-xs, a.link-hover.text-xs { display: inline-flex; align-items: center; min-height: 1.5rem; }
+a.badge { min-height: 1.5rem; }
+summary { min-height: 1.5rem; padding-block: 0.25rem; }

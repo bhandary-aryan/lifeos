@@ -37,13 +37,14 @@
 {% block extra_js %}
 {% load static %}
 <script src="{% static 'vendor/chart.umd.js' %}"></script>
+<script src="{% static 'js/chart-theme.js' %}"></script>
 <script>
 (function () {
   var el = document.getElementById("chart-data"); if (!el || !window.Chart) return;
-  var d = JSON.parse(el.textContent);
+  var d = JSON.parse(el.textContent), C = (window.LifeosChart || {}).colors || { primary: "#0f766e", secondary: "#6366f1", success: "#16a34a" };
   new Chart(document.getElementById("year-chart"), { type: "line", data: { labels: d.labels, datasets: [
-    { label: "Income", data: d.income, borderColor: "#16a34a", backgroundColor: "#16a34a" },
-    { label: "Spending", data: d.spending, borderColor: "#6366f1", backgroundColor: "#6366f1" } ] },
+    { label: "Income", data: d.income, borderColor: C.success, backgroundColor: C.success },
+    { label: "Spending", data: d.spending, borderColor: C.secondary, backgroundColor: C.secondary } ] },
     options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true } } } });
 })();
 </script>

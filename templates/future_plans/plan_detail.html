@@ -27,7 +27,7 @@
     {% if info.estimate %}
     <div class="mt-5 rounded-box border border-base-300 p-4">
       <div class="flex flex-wrap items-center justify-between gap-2"><h4 class="text-sm font-semibold">Estimated monthly saving {% if info.whatif %}<span class="badge badge-info badge-outline badge-sm">what-if date</span>{% endif %}</h4>
-        <form method="get" class="flex items-center gap-2"><label class="text-xs" for="whatif">Try another target date</label><input id="whatif" type="date" name="whatif" value="{{ whatif_value }}" class="input input-bordered input-sm"><button class="btn btn-sm btn-outline" type="submit">Recalculate</button>{% if info.whatif %}<a class="btn btn-sm btn-ghost" href="{% url 'future_plans:detail' plan.pk %}">Reset</a>{% endif %}</form></div>
+        <form method="get" class="flex flex-wrap items-center gap-2"><label class="text-xs" for="whatif">Try another target date</label><input id="whatif" type="date" name="whatif" value="{{ whatif_value }}" class="input input-bordered input-sm"><button class="btn btn-sm btn-outline" type="submit">Recalculate</button>{% if info.whatif %}<a class="btn btn-sm btn-ghost" href="{% url 'future_plans:detail' plan.pk %}">Reset</a>{% endif %}</form></div>
       {% with e=info.estimate %}
       {% if e.state == "achieved" %}<p class="mt-2 text-sm">Nothing left to save — the target amount is already reached.</p>
       {% elif e.state == "no_date" %}<p class="mt-2 text-sm text-base-content/70">Add a target date to see how much to save each month. {{ e.remaining|money:plan.currency }} remains.</p>

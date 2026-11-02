@@ -7,7 +7,7 @@
     </button>
   </form>
   <div class="min-w-0 flex-1">
-    <a href="{% url 'planner:task_update' task.pk %}?next={{ next_url|urlencode }}" class="block truncate text-sm font-medium hover:underline {% if task.is_done %}text-base-content/50 line-through{% elif task.status == 'cancelled' %}text-base-content/40 line-through{% endif %}">{{ task.title }}</a>
+    <a href="{% url 'planner:task_update' task.pk %}?next={{ next_url|urlencode }}" class="block truncate py-1 text-sm font-medium hover:underline {% if task.is_done %}text-base-content/50 line-through{% elif task.status == 'cancelled' %}text-base-content/40 line-through{% endif %}">{{ task.title }}</a>
     <div class="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-base-content/60">
       {% if task.due_date %}<span class="{% if task.due_date < today and not task.is_done and task.status != 'cancelled' %}font-medium text-error{% endif %}">{{ task.due_date|date:"D j M" }}</span>{% endif %}
       {% if task.start_at %}<span>{{ task.start_at|date:"H:i" }}</span>{% endif %}
@@ -15,7 +15,7 @@
       <span class="badge badge-sm {% if task.priority == 'high' %}badge-error badge-outline{% elif task.priority == 'low' %}badge-ghost{% else %}badge-outline{% endif %}">{{ task.get_priority_display }}</span>
       {% if task.status == 'in_progress' %}<span class="badge badge-info badge-sm badge-outline">In progress</span>{% endif %}
       {% if task.status == 'cancelled' %}<span class="badge badge-ghost badge-sm">Cancelled</span>{% endif %}
-      {% if task.goal_id %}<a href="{% url 'goals:detail' task.goal_id %}" class="link link-hover text-primary">{{ task.goal.title }}</a>{% endif %}
+      {% if task.goal_id %}<a href="{% url 'goals:detail' task.goal_id %}" class="link link-hover inline-block py-1 text-primary">{{ task.goal.title }}</a>{% endif %}
     </div>
   </div>
 </li>
