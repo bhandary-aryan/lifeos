@@ -76,15 +76,42 @@ class ProfileForm(forms.ModelForm):
 class PreferencesForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ["currency", "timezone", "date_format", "week_start", "daily_available_minutes", "reminders_enabled", "reminder_lead_days", "theme"]
+        fields = ["currency", "timezone", "date_format", "week_start", "daily_available_minutes", "reminders_enabled", "reminder_lead_days", "email_reminders", "email_frequency", "email_digest_hour", "quiet_start_hour", "quiet_end_hour", "theme"]
         widgets = {
             **{f: forms.Select(attrs={"class": SELECT}) for f in ["currency", "timezone", "date_format", "week_start", "theme"]},
             "daily_available_minutes": forms.NumberInput(attrs={"class": INPUT, "min": 30, "max": 1440, "step": 15}),
             "reminder_lead_days": forms.NumberInput(attrs={"class": INPUT, "min": 1, "max": 14}),
             "reminders_enabled": forms.CheckboxInput(attrs={"class": "checkbox"}),
+            "email_reminders": forms.CheckboxInput(attrs={"class": "checkbox"}),
+            "email_frequency": forms.Select(attrs={"class": SELECT}),
+            "email_digest_hour": forms.NumberInput(attrs={"class": INPUT, "min": 0, "max": 23}),
+            "quiet_start_hour": forms.NumberInput(attrs={"class": INPUT, "min": 0, "max": 23}),
+            "quiet_end_hour": forms.NumberInput(attrs={"class": INPUT, "min": 0, "max": 23}),
         }
         labels = {"daily_available_minutes": "Available minutes per day", "reminders_enabled": "Show in-app reminders",
-                  "reminder_lead_days": "Remind me this many days ahead"}
+                  "reminder_lead_days": "Remind me this many days ahead",
+                  "email_reminders": "Also email me a digest", "email_frequency": "Digest frequency", "email_digest_hour": "Send no earlier than (hour, 0-23)",
+                  "quiet_start_hour": "Quiet hours start (0-23, optional)", "quiet_end_hour": "Quiet hours end (0-23, optional)"}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Omitted by older forms/clients: keep the current value instead of failing validation.
+        for f in ("email_frequency", "email_digest_hour"):
+            self.fields[f].required = False
+
+    def clean(self):
+        cleaned = super().clean()
+        for f in ("email_frequency", "email_digest_hour"):
+            # Only a field that was never submitted keeps its value. A submitted-but-invalid value must stay an error.
+            if self.add_prefix(f) not in self.data or self.data.get(self.add_prefix(f)) == "":
+                cleaned[f] = getattr(self.instance, f)
+                self._errors.pop(f, None)
+        start, end = cleaned.get("quiet_start_hour"), cleaned.get("quiet_end_hour")
+        if (start is None) != (end is None):
+            self.add_error("quiet_end_hour" if end is None else "quiet_start_hour", "Set both quiet-hour values, or leave both empty.")
+        elif start is not None and start == end:
+            self.add_error("quiet_end_hour", "Quiet hours must start and end at different hours.")
+        return cleaned
 
 
 class LifeAreasForm(forms.Form):

@@ -15,6 +15,8 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[])
 
 # Product name is configurable so the app can be renamed later.
 SITE_NAME = env("LIFEOS_SITE_NAME", default="LifeOS")
+# Absolute base URL used for links inside emails (set to your real https:// address in production).
+SITE_URL = env("LIFEOS_SITE_URL", default="http://localhost:8000").rstrip("/")
 
 INSTALLED_APPS = [
     "django.contrib.admin",

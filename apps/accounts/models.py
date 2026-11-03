@@ -112,6 +112,18 @@ class Profile(models.Model):
     reminder_lead_days = models.PositiveSmallIntegerField(
         default=3, validators=[MinValueValidator(1), MaxValueValidator(14)],
         help_text="How many days ahead to remind you about deadlines (1-14).")
+    class EmailFrequency(models.TextChoices):
+        DAILY = "daily", "Every day"
+        WEEKDAYS = "weekdays", "Weekdays only"
+        WEEKLY = "weekly", "Once a week (first day of my week)"
+
+    email_reminders = models.BooleanField(default=False, help_text="Email me one digest of what needs attention (opt-in).")
+    email_frequency = models.CharField(max_length=10, choices=EmailFrequency.choices, default=EmailFrequency.DAILY)
+    email_digest_hour = models.PositiveSmallIntegerField(default=8, validators=[MinValueValidator(0), MaxValueValidator(23)],
+                                                         help_text="Earliest local hour (0-23) the digest may be sent.")
+    quiet_start_hour = models.PositiveSmallIntegerField(null=True, blank=True, validators=[MaxValueValidator(23)], help_text="Quiet hours start (local, 0-23).")
+    quiet_end_hour = models.PositiveSmallIntegerField(null=True, blank=True, validators=[MaxValueValidator(23)], help_text="Quiet hours end (local, 0-23).")
+    last_digest_on = models.DateField(null=True, blank=True, editable=False, help_text="Local date of the last digest decision; makes sending idempotent.")
     life_areas = models.JSONField(default=list, blank=True)
     onboarding_completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

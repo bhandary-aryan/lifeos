@@ -16,7 +16,7 @@ Stack: Python 3.12 · Django 5.2 LTS · PostgreSQL 16 · Django templates · Tai
 | Future plans | Cost vs savings target vs actually-saved kept separate, monthly estimate, what-if date, affordability check |
 | Interests | Hobbies, favourites, bucket list, tags, private images, optional "add to planner" |
 | Reflection | Weekly review with a data snapshot, private journal, 12-month insights with accessible data tables |
-| Reminders | In-app, computed on demand, respecting your on/off and look-ahead settings |
+| Reminders | In-app (computed on demand) plus an optional, opt-in email digest with your own hour, frequency and quiet hours |
 
 Nothing on any page is made up: every figure is calculated from your records, and empty states say so.
 
@@ -62,7 +62,7 @@ The suite covers calculations, integrity rules, ownership (every detail/edit/del
 - [docs/CHECKLIST.md](docs/CHECKLIST.md) – implementation status per phase, with gaps
 
 ## Known limitations
-- **Not implemented:** email/push reminders and quiet hours (need a scheduler), recurring tasks and transactions, CSV *import*, bank connections, currency conversion, interest-accrual/amortisation schedules, dashboard widget rearranging, calendar-app integration, offline/PWA support, AI-assisted features.
+- **Not implemented:** push notifications, recurring tasks and transactions, CSV *import*, bank connections, currency conversion, interest-accrual/amortisation schedules, dashboard widget rearranging, calendar-app integration, offline/PWA support, AI-assisted features.
 - Journal/review text and uploaded images are stored **unencrypted** at the application level (protect them with disk/database encryption and backups).
 - Uploaded images are served as uploaded: no resizing, no malware scanning.
 - Habit statistics for a past period that contained a pause count the paused days as missed; "N per week" figures are approximate for partial weeks/months.
