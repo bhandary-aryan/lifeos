@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "finance/_subnav.html" %}
+<div class="mx-auto max-w-2xl space-y-5">
+  <section class="card-surface p-6">
+    <h2 class="text-base font-semibold">Import transactions from a CSV file</h2>
+    <p class="mt-1 text-sm text-base-content/70">You'll see every row — and any problems — on a review page <strong>before anything is saved</strong>.</p>
+    {% if error %}<div class="alert alert-error mt-4 text-sm" role="alert">{{ error }}</div>{% endif %}
+    <form method="post" enctype="multipart/form-data" class="mt-4 space-y-3" novalidate>
+      {% csrf_token %}
+      <div class="form-control"><label for="csv-file" class="label"><span class="label-text font-medium">CSV file (max 1 MB, 1000 rows)</span></label>
+        <input id="csv-file" type="file" name="file" accept=".csv,text/csv" class="file-input file-input-bordered w-full" required></div>
+      <button class="btn btn-primary btn-sm" type="submit">Check file</button>
+      <a href="{% url 'finance:transactions' %}" class="btn btn-ghost btn-sm">Cancel</a>
+    </form>
+  </section>
+  <section class="card-surface p-6 text-sm">
+    <h3 class="text-base font-semibold">Expected format</h3>
+    <p class="mt-2 text-base-content/70">The same columns as <em>Export CSV</em>, so an export can be imported again.
+      <a class="link link-primary" href="{% url 'finance:import_template' %}">Download a template</a>.</p>
+    <ul class="mt-3 list-disc space-y-1 pl-5 text-base-content/80">
+      <li>Required: <code>date</code>, <code>type</code> (income, expense, transfer, debt_payment), <code>amount</code>, <code>account</code>.</li>
+      <li>Transfers also need <code>to_account</code>. Debt payments need <code>debt</code>, <code>principal</code> and <code>interest</code> (which must add up to the amount).</li>
+      <li>Accounts, categories and debts are matched by <strong>name</strong> against yours. Unknown names are reported, never created.</li>
+      <li>Dates like <code>2026-03-31</code> or in your preferred format. Amounts like <code>1234.56</code> or <code>1,234.56</code>, never negative — the type sets the direction.</li>
+      <li>Rows that look like transactions you already have are flagged and left unticked.</li>
+    </ul>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "finance/_subnav.html" %}
+<form method="post" class="space-y-4" novalidate>
+  {% csrf_token %}<input type="hidden" name="token" value="{{ token }}">
+  <section class="card-surface p-5">
+    <h2 class="text-base font-semibold">Review before importing{% if filename %} <span class="text-sm font-normal text-base-content/60">— {{ filename }}</span>{% endif %}</h2>
+    <p class="mt-1 text-sm" role="status"><strong>{{ n_ok }}</strong> ready to import{% if n_dup %} · <strong>{{ n_dup }}</strong> look like duplicates (unticked){% endif %}{% if n_err %} · <strong class="text-error">{{ n_err }}</strong> with problems (cannot be imported){% endif %}.</p>
+    <p class="mt-1 text-xs text-base-content/60">Nothing has been saved yet. Importing is all-or-nothing: if any ticked row fails when saved, none are imported. This review expires after 30 minutes.</p>
+    <div class="mt-3 flex flex-wrap gap-2">
+      <button class="btn btn-primary btn-sm" type="submit" {% if not n_ok and not n_dup %}disabled{% endif %}>Import ticked rows</button>
+      <button class="btn btn-ghost btn-sm" type="submit" formaction="{% url 'finance:import_cancel' %}" formnovalidate>Cancel</button>
+    </div>
+  </section>
+  <div class="card-surface overflow-x-auto">
+    <table class="table table-sm">
+      <thead><tr><th><span class="sr-only">Import</span></th><th>Line</th><th>Status</th><th class="hidden sm:table-cell">Date</th><th class="hidden sm:table-cell">Type</th><th class="hidden text-right sm:table-cell">Amount</th><th class="hidden sm:table-cell">Account</th><th class="hidden sm:table-cell">Other</th><th class="hidden sm:table-cell">Description</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr class="{% if r.errors %}bg-error/5{% endif %}">
+          <td>{% if r.errors %}<span aria-hidden="true">—</span>{% else %}<input type="checkbox" name="row" value="{{ r.n }}" class="checkbox checkbox-sm" id="row-{{ r.n }}" aria-label="Import line {{ r.n }}" {% if not r.dup %}checked{% endif %}>{% endif %}</td>
+          <td class="tabular-nums">{{ r.n }}</td>
+          <td class="text-xs sm:max-w-xs">{% if r.errors %}<span class="font-medium text-error">Problem</span><ul class="list-disc pl-4 text-error">{% for e in r.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% elif r.dup %}<span class="font-medium text-warning">Possible duplicate</span>{% else %}<span class="text-success">OK</span>{% endif %}
+            <p class="mt-1 text-sm text-base-content sm:hidden"><span class="tabular-nums">{{ r.l.date }}</span> · {{ r.l.type }} · <strong class="tabular-nums">{{ r.l.amount }}</strong><br>{{ r.l.account }}{% if r.l.to %}{% if r.l.type == "transfer" %} → {% else %} · {% endif %}{{ r.l.to }}{% endif %}{% if r.l.description %}<br><span class="text-base-content/70">{{ r.l.description }}</span>{% endif %}</p></td>
+          <td class="hidden whitespace-nowrap sm:table-cell">{{ r.l.date }}</td><td class="hidden sm:table-cell">{{ r.l.type }}</td><td class="hidden text-right tabular-nums sm:table-cell">{{ r.l.amount }}</td><td class="hidden sm:table-cell">{{ r.l.account }}</td><td class="hidden sm:table-cell">{{ r.l.to }}</td><td class="hidden max-w-xs truncate sm:table-cell">{{ r.l.description }}</td>
+        </tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</form>
+{% endblock %}

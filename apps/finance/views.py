@@ -9,6 +9,7 @@ from django.db.models import F, ProtectedError, Q, RestrictedError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import CURRENCY_CHOICES
@@ -435,3 +436,99 @@ def contribution_delete(request, pk):
     back = reverse("finance:savings_detail", args=[c.goal_id])
     extra = "The linked account transfer will also be removed." if c.transfer_id else ""
     return _confirm(request, c, "contribution", back, back, fin.delete_contribution, "Contribution deleted.", extra)
+
+
+# ------------------------------------------------------------------ CSV import
+IMPORT_KEY = "tx_import"
+IMPORT_TTL = dt.timedelta(minutes=30)
+
+
+@login_required
+def import_upload(request):
+    from . import importer
+
+    error = None
+    if request.method == "POST":
+        f = request.FILES.get("file")
+        if not f:
+            error = "Choose a CSV file first."
+        else:
+            try:
+                data = f.read(importer.MAX_BYTES + 1)
+                rows = importer.build_preview(request.user, data)
+            except importer.FileProblem as exc:
+                error = str(exc)
+            else:
+                import uuid
+                request.session[IMPORT_KEY] = {"token": uuid.uuid4().hex, "created": timezone.now().isoformat(), "filename": f.name[:80],
+                                               "rows": [r.as_dict() for r in rows]}
+                return redirect("finance:import_review")
+    return render(request, "finance/transaction_import.html", {"page_title": "Import transactions", "tab": "transactions", "error": error})
+
+
+def _stored_import(request):
+    """The pending preview for this session, or None if it is missing or has expired."""
+    stored = request.session.get(IMPORT_KEY)
+    if not stored:
+        return None
+    try:
+        created = dt.datetime.fromisoformat(stored["created"])
+    except (KeyError, ValueError):
+        request.session.pop(IMPORT_KEY, None)
+        return None
+    if timezone.now() - created > IMPORT_TTL:
+        request.session.pop(IMPORT_KEY, None)
+        return None
+    return stored
+
+
+@login_required
+def import_review(request):
+    from . import importer
+
+    stored = _stored_import(request)
+    if not stored:
+        messages.info(request, "That import has expired or was already completed. Upload the file again.")
+        return redirect("finance:import_upload")
+    rows = stored["rows"]
+    if request.method == "POST":
+        if request.POST.get("token") != stored["token"]:
+            messages.error(request, "That review is out of date. Upload the file again.")
+            return redirect("finance:import_upload")
+        selected = {int(n) for n in request.POST.getlist("row") if n.isdigit()}
+        request.session.pop(IMPORT_KEY, None)                      # consume first: a double-click or refresh can never import twice
+        if not selected:
+            messages.info(request, "No rows were selected, so nothing was imported.")
+            return redirect("finance:transactions")
+        try:
+            n = importer.commit(request.user, rows, selected)
+        except importer.ImportAborted as exc:
+            messages.error(request, f"Nothing was imported. {exc}")
+            return redirect("finance:import_upload")
+        messages.success(request, f"Imported {n} transaction{'s' if n != 1 else ''}. Balances and reports have been updated.")
+        return redirect("finance:transactions")
+    ok = [r for r in rows if not r["errors"]]
+    ctx = {"page_title": "Review import", "tab": "transactions", "rows": rows, "token": stored["token"], "filename": stored.get("filename", ""),
+           "n_ok": sum(1 for r in ok if not r["dup"]), "n_dup": sum(1 for r in ok if r["dup"]), "n_err": sum(1 for r in rows if r["errors"])}
+    return render(request, "finance/transaction_import_review.html", ctx)
+
+
+@login_required
+@require_POST
+def import_cancel(request):
+    request.session.pop(IMPORT_KEY, None)
+    messages.info(request, "Import cancelled. Nothing was saved.")
+    return redirect("finance:transactions")
+
+
+@login_required
+def import_template(request):
+    resp = HttpResponse(content_type="text/csv")
+    resp["Content-Disposition"] = 'attachment; filename="lifeos-transactions-template.csv"'
+    w = csv.writer(resp)
+    w.writerow(["date", "type", "amount", "currency", "account", "to_account", "category", "description", "debt", "principal", "interest"])
+    w.writerow(["2026-03-01", "expense", "12.50", "GBP", "Current account", "", "Groceries", "Weekly shop (example)", "", "0", "0"])
+    w.writerow(["2026-03-02", "income", "2400.00", "GBP", "Current account", "", "Salary", "March pay (example)", "", "0", "0"])
+    w.writerow(["2026-03-03", "transfer", "200.00", "GBP", "Current account", "Savings account", "", "To savings (example)", "", "0", "0"])
+    w.writerow(["2026-03-04", "debt_payment", "120.00", "GBP", "Current account", "", "", "Loan payment (example)", "Student loan", "105.00", "15.00"])
+    return resp

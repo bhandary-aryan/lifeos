@@ -14,7 +14,8 @@
       <select name="sort" class="select select-bordered select-sm" aria-label="Sort"><option value="">Newest first</option><option value="date" {% if f.sort == "date" %}selected{% endif %}>Oldest first</option><option value="amount" {% if f.sort == "amount" %}selected{% endif %}>Largest first</option><option value="amount_asc" {% if f.sort == "amount_asc" %}selected{% endif %}>Smallest first</option></select>
       <button class="btn btn-sm btn-outline" type="submit">Apply</button>{% if qs %}<a href="{% url 'finance:transactions' %}" class="btn btn-sm btn-ghost">Clear</a>{% endif %}
     </form>
-    <div class="flex gap-2"><a href="{% url 'finance:transactions_export' %}?{{ qs }}" class="btn btn-sm btn-ghost"><i data-lucide="download" class="h-4 w-4"></i> CSV</a>
+    <div class="flex flex-wrap gap-2"><a href="{% url 'finance:transactions_export' %}?{{ qs }}" class="btn btn-sm btn-ghost"><i data-lucide="download" class="h-4 w-4"></i> Export CSV</a>
+      <a href="{% url 'finance:import_upload' %}" class="btn btn-sm btn-ghost"><i data-lucide="upload" class="h-4 w-4"></i> Import CSV</a>
       <a href="{% url 'finance:transaction_create' %}" class="btn btn-sm btn-primary"><i data-lucide="plus" class="h-4 w-4"></i> New</a></div>
   </div>
 

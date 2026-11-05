@@ -12,7 +12,7 @@ Stack: Python 3.12 · Django 5.2 LTS · PostgreSQL 16 · Django templates · Tai
 | Goals | Life areas, goals, weighted milestones, progress by manual %, milestones or tasks (a task is never counted twice) |
 | Planner | Tasks, Today/Week/Upcoming/Overdue/All, time-available warnings (suggestions only), quick add |
 | Habits | Daily / chosen weekdays / N per week, streaks, weekly and monthly consistency, pause without losing history |
-| Finance | Accounts, income/expense/transfer/debt payment, budgets, reports, debts (principal vs interest), repayment planner, savings goals |
+| Finance | Accounts, income/expense/transfer/debt payment, budgets, reports, debts (principal vs interest), repayment planner, savings goals, CSV import (with a review step) and export |
 | Future plans | Cost vs savings target vs actually-saved kept separate, monthly estimate, what-if date, affordability check |
 | Interests | Hobbies, favourites, bucket list, tags, private images, optional "add to planner" |
 | Reflection | Weekly review with a data snapshot, private journal, 12-month insights with accessible data tables |
@@ -62,7 +62,7 @@ The suite covers calculations, integrity rules, ownership (every detail/edit/del
 - [docs/CHECKLIST.md](docs/CHECKLIST.md) – implementation status per phase, with gaps
 
 ## Known limitations
-- **Not implemented:** push notifications, recurring tasks and transactions, CSV *import*, bank connections, currency conversion, interest-accrual/amortisation schedules, dashboard widget rearranging, calendar-app integration, offline/PWA support, AI-assisted features.
+- **Not implemented:** push notifications, recurring tasks and transactions, bank connections, currency conversion, interest-accrual/amortisation schedules, dashboard widget rearranging, calendar-app integration, offline/PWA support, AI-assisted features.
 - Journal/review text and uploaded images are stored **unencrypted** at the application level (protect them with disk/database encryption and backups).
 - Uploaded images are served as uploaded: no resizing, no malware scanning.
 - Habit statistics for a past period that contained a pause count the paused days as missed; "N per week" figures are approximate for partial weeks/months.

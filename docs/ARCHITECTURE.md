@@ -35,6 +35,9 @@ Datetimes are stored in UTC and shown in the user's timezone (middleware). Calen
 - `RESTRICT` (not `PROTECT`) on accounts/debts/linked transfers: in-use records can't be deleted on their own, but deleting a whole user still cascades.
 - Locking order: accounts by id, then debts. Concurrency tests use real parallel connections and were mutation-checked.
 
+## CSV import (`finance/importer.py`)
+parse → validate → review → commit. `build_preview` validates every row with the same model rules as the form and flags likely duplicates; the review page lists each row (problems explained, duplicates unticked); `commit` creates the ticked rows in date order inside one transaction through `save_transaction`, so state-dependent rules (e.g. overpaying a debt) still apply and any failure imports nothing. The export format round-trips (including undoing the export's formula-escaping apostrophe).
+
 ## Estimates
 `finance/calculations.py` is pure and deterministic: months remaining (a partial month counts as one), monthly saving = remaining ÷ months rounded **up** to the cent, affordability, avalanche/snowball simulation. No returns, inflation or rate changes are assumed, and the UI labels results as estimates.
 

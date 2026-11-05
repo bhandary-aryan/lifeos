@@ -10,6 +10,7 @@ Django's defaults are a good start, not a guarantee. This lists what the app doe
 - **Throttling:** 5 failed sign-ins per (email, address) and 20 per address within 15 minutes; 5 password-reset requests per address per 15 minutes. Counted identically for unknown emails. A stranger cannot lock you out from their own address.
 - Output escaping by Django templates (no `|safe` on user input). ORM only.
 - CSV exports neutralise spreadsheet formula injection.
+- CSV import: nothing is saved until the user reviews every row; accounts/categories/debts are matched by name against the user's OWN records only (and the model re-checks ownership); file limits (1 MB, 1000 rows, UTF-8); ambiguous amounts such as `12,5` are rejected rather than guessed; the staged preview lives in the user's server-side session, expires after 30 minutes and is consumed on first use, so a double click or refresh cannot import twice; the commit is all-or-nothing through the same locked save path as the web form.
 - Uploaded images: format whitelist (JPEG/PNG/GIF/WebP), size/pixel limits, random file names, delivered only through an owner-checked view with `nosniff` and a restrictive CSP; removed on replace/delete/account deletion.
 - Secrets only from the environment; `.env` is git-ignored. No bank credentials are stored or requested.
 - Error pages show no stack traces, paths or exception text.

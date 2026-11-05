@@ -39,7 +39,7 @@
 - [x] Locking: accounts by pk then debts; real parallel-connection tests (mutation-checked: the debt-lock test fails without the lock)
 - [x] FK relations use RESTRICT so in-use accounts/debts can't be deleted but account deletion still cascades
 - [x] Dashboard finance section; data export and account deletion cover finance
-- [ ] CSV IMPORT with review step – NOT implemented (planned; export only)
+- [x] CSV import with review step – added in Phase 6 (see below)
 - [ ] Link from a savings goal to a future plan – added in Phase 4 (future_plans app does not exist yet)
 - [ ] Interest accrual / amortisation schedules – NOT modelled (principal tracker only)
 - [ ] Multi-currency conversion – deliberately not done; reports are per currency
@@ -75,4 +75,5 @@
 - [ ] Real devices, Safari/Firefox, screen readers – NOT done
 ## Phase 6 – advanced  [started]
 - [x] Email reminders (see above)
-- [ ] CSV import, recurring items, scenarios, calendar sync, PWA, bank integrations – not started
+- [x] CSV import of transactions with a review step: validation per row, duplicate flagging, all-or-nothing commit, export round-trip, 1 MB / 1000-row limits
+- [ ] Recurring items, affordability scenarios, calendar sync, PWA, bank integrations – not started
