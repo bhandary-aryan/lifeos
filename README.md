@@ -21,11 +21,13 @@ Stack: Python 3.12 · Django 5.2 LTS · PostgreSQL 16 · Django templates · Tai
 Nothing on any page is made up: every figure is calculated from your records, and empty states say so.
 
 ## Local setup
+**New here? Follow [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** for a step-by-step guide (Windows, macOS, Linux). The short version:
+
 ```bash
 python3 -m venv .venv && . .venv/bin/activate
 pip install -r requirements-dev.txt
 npm install && npm run vendor && npm run build:css   # vendor copies JS libs into static/vendor (and strips source-map comments); build:css compiles Tailwind
-cp .env.example .env                      # then edit (never commit .env)
+python scripts/make_env.py                # writes .env with a random secret key and prints the SQL below (never commit .env)
 ```
 PostgreSQL (the only supported database):
 ```sql
@@ -56,6 +58,7 @@ The suite covers calculations, integrity rules, ownership (every detail/edit/del
 `qa/visual_sweep.js` drives a real browser over the app and fails on layout overflow, JS errors and small tap targets (see [qa/README.md](qa/README.md)). pytest cannot see layout; every responsive bug found so far came from this sweep.
 
 ## Documentation
+- [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) – step-by-step setup on your own computer
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) – apps, models, money rules, calculations
 - [docs/SECURITY.md](docs/SECURITY.md) – what is protected, how, and what is *not*
 - [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) – production settings, environment, checklist
