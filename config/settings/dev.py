@@ -1,4 +1,5 @@
 from .base import *  # noqa: F401,F403
+from .base import MIDDLEWARE as _BASE_MIDDLEWARE
 from .base import env
 
 DEBUG = True
@@ -11,3 +12,7 @@ STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
+
+# Django's own staticfiles handler serves assets while DEBUG is on, so the production static-file middleware
+# (WhiteNoise) is not needed here, and it only warns that `staticfiles/` has not been collected.
+MIDDLEWARE = [m for m in _BASE_MIDDLEWARE if "whitenoise" not in m]
